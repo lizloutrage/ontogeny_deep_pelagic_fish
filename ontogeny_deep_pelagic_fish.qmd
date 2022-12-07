@@ -1,0 +1,140 @@
+---
+title: "Ontogeny of deep pelagic fish"
+format: html
+editor: visual
+theme: minty
+toc: true
+toc-title: Sections
+toc-location: left
+page-layout: full
+---
+
+```{r}
+#| echo: false
+ontogeny_data <- utils::read.csv(here::here("data", "ontogeny.csv"), sep = ";", header = T,dec = ",")
+```
+
+## d15N - size relationship
+
+- d15N standardized for all species
+```{r}
+#| echo: false
+#| warning: false
+#| fig-height: 10
+#| fig-width: 10
+
+
+library(ggplot2)
+ontogeny_data$Espece <- factor(ontogeny_data$Espece,
+                          levels = c("Stomias_boa",
+                                     "Lampanyctus_crocodilus",
+                                     "Myctophum_punctatum",
+                                     "Aphanopus_carbo",
+                                     "Melanostigma_atlanticum",
+                                     "Serrivomer_beanii",
+                                     "Argyropelecus_olfersii",
+                                     "Lampanyctus_macdonaldi",
+                                     "Searsia_koefoedi",
+                                     "Notoscopelus_kroyeri",
+                                     "Xenodermichthys_copei",
+                                     "Arctozenus_risso"),
+                          labels = c("Stomias boa",
+                                     "Lampanyctus crocodilus",
+                                     "Myctophum punctatum",
+                                     "Aphanopus carbo",
+                                     "Melanostigma atlanticum",
+                                     "Serrivomer beanii",
+                                     "Argyropelecus olfersii",
+                                     "Lampanyctus macdonaldi",
+                                     "Searsia koefoedi",
+                                     "Notoscopelus kroyeri",
+                                     "Xenodermichthys copei",
+                                     "Arctozenus risso"))
+
+ggplot(ontogeny_data , aes(x=Size, y=d15N_Muscle_non_traite))+
+  geom_point (alpha=0.5, col="black") + 
+  geom_smooth(method=lm, se=T, alpha=0.2, col= alpha("darkblue",0.7)) +
+  facet_wrap(~Espece, scale="free_x", ncol=3)+ 
+  ggpmisc::stat_poly_eq(formula = y ~ x, 
+               aes(label = paste(..eq.label.., ..rr.label.., ..p.value.label.. 
+                                 , ..n.label..,sep = "*`,`~")),
+               parse = TRUE,
+               size=3,
+               label.x.npc = "right",
+               label.y.npc = "bottom",
+               vstep = -0.0005)+ 
+  xlab("Standard Length (cm)")+
+  ylab(expression({delta}^15*N~'\u2030'))+
+  guides(color="none", fill="none")+
+  theme_minimal()+
+  theme(strip.text.x = element_text(size=10,face="italic"),
+        axis.title = element_text(size=10),
+        axis.text =  element_text(size=10))
+```
+
+
+### Summarise results 
+```{r}
+#| echo: false
+#| warning: false
+library(tidyr)
+library(dplyr)
+ontogeny_summary <- ontogeny_data %>%
+  group_by(Espece) %>%
+  do(broom::tidy(lm(d15N_Muscle_non_traite~Size, data =.)))
+DT::datatable(ontogeny_summary)
+```
+
+
+
+### All relationship on 1 plot
+```{r}
+#| echo: false
+#| warning: false 
+#| fig-height: 6
+#| fig-width: 10
+ggplot(ontogeny_data , aes(x=Size, y=d15N_Muscle_non_traite))+
+  geom_point (alpha=0.3, size=0.7, aes(col=Espece)) + 
+  geom_smooth(method=lm, se=T, alpha=0.1, aes(col=Espece)) + 
+  paletteer::scale_color_paletteer_d("ggsci::category20_d3")+
+  xlab("Standard Length (cm)")+
+  ylab(expression({delta}^15*N~'\u2030'))+
+  labs(col="Species")+
+  guides(fill="none")+
+  theme_minimal()+
+  theme(axis.title = element_text(size=10),
+        axis.text =  element_text(size=10),
+        legend.text = element_text(face = "italic"))
+```
+
+### Significant relationship on 1 plot
+Arctozenus risso was the only species with a significantly negative relationship
+
+
+```{r}
+#| echo: false
+#| warning: false 
+#| fig-height: 6
+#| fig-width: 10
+
+ontogeny_significant <- subset(ontogeny_data, Espece=="Lampanyctus crocodilus"|
+                                  Espece=="Aphanopus carbo"|
+                                  Espece=="Melanostigma atlanticum"|
+                                  Espece=="Serrivomer beanii"|
+                                  Espece=="Stomias boa"|
+                                  Espece=="Myctophum punctatum"|
+                                  Espece=="Arctozenus risso")
+
+ggplot(ontogeny_significant , aes(x=Size, y=d15N_Muscle_non_traite))+
+  geom_point (alpha=0.3, size=0.7, aes(col=Espece)) + 
+  geom_smooth(method=lm, se=T, alpha=0.1, aes(col=Espece)) + 
+  paletteer::scale_color_paletteer_d("ggsci::category20_d3")+
+  xlab("Standard Length (cm)")+
+  ylab(expression({delta}^15*N~'\u2030'))+
+  labs(col="Species")+
+  guides(fill="none")+
+  theme_minimal()+
+  theme(axis.title = element_text(size=10),
+        axis.text =  element_text(size=10),
+        legend.text = element_text(face = "italic"))
+```

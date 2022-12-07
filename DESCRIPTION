@@ -1,0 +1,17 @@
+Package: ontogeny_deep_pelagic_fish
+Type: Package
+Title: The Title of the Project
+Version: 0.0.0.9000
+Authors@R: c(
+    person(given   = "Liz",
+           family  = "Loutrage",
+           role    = c("aut", "cre", "cph"),
+           email   = "liz.loutrage@gmail.com",
+           comment = c(ORCID = "{{orcid}}")))
+Description: The objective of this project is to explore the influence of individual size and depth of occurrence on the d15N values of several deeppelagic fish species.
+URL: https://github.com/lizloutrage/ontogeny_deep_pelagic_fish
+BugReports: https://github.com/lizloutrage/ontogeny_deep_pelagic_fish/issues
+License: GPL-2
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.2.1

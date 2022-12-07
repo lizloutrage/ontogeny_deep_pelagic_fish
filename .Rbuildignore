@@ -1,0 +1,7 @@
+^data$
+^outputs$
+^figures$
+^analyses$
+^LICENSE\.md$
+^.*\.Rproj$
+^\.Rproj\.user$
