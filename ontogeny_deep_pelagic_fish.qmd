@@ -39,10 +39,10 @@ ontogeny_data$species <- factor(ontogeny_data$species,
                                           "Arctozenus risso"))
 ```
 
-## d15N - size relationship
+## $\delta$<sup>15</sup>N - size relationship
 
 - significant relationships
-- d15N axis standardized
+- $\delta$<sup>15</sup>N axis standardized
 
 ```{r}
 #| echo: false
@@ -135,7 +135,7 @@ ggplot(ontogeny_non_significant , aes(x=size, y=d15N_muscle_untreated))+
 
 
 ### Summarise results 
-#### d15N size relationship
+#### $\delta$<sup>15</sup>N size relationship
 ```{r}
 #| echo: true
 #| warning: false
@@ -147,7 +147,7 @@ ontogeny_d15n_size <- ontogeny_data %>%
 DT::datatable(ontogeny_d15n_size)
 ```
 
-#### d15N depth relationship
+#### $\delta$<sup>15</sup>N depth relationship
 ```{r}
 #| echo: true
 #| warning: false
@@ -219,12 +219,69 @@ ggplot(ontogeny_significant , aes(x=size, y=d15N_muscle_untreated))+
         axis.text =  element_text(size=10),
         legend.text = element_text(face = "italic"))
 ```
-# d15N in function of depth 
+
+#### By separating large and small species
+```{r}
+#| echo: false
+#| warning: false 
+#| fig-height: 6
+#| fig-width: 12
+
+ontogeny_large_sp <- subset(ontogeny_data, species=="Aphanopus carbo"|
+                                  species=="Serrivomer beanii"|
+                                  species=="Stomias boa")
+
+large_sp <- ggplot(ontogeny_large_sp , aes(x=size, y=d15N_muscle_untreated))+
+  geom_point (alpha=0.3, size=0.7, aes(col=species)) + 
+  geom_smooth(method=lm, se=T, alpha=0.1, aes(col=species)) + 
+  paletteer::scale_color_paletteer_d("ggsci::category20_d3")+
+  xlab("Standard Length (cm)")+
+  ylab(expression({delta}^15*N~'\u2030'))+
+  labs(col="Large species")+
+  guides(fill="none")+
+  ylim(c(7,13))+
+  theme_minimal()+
+  theme(axis.title = element_text(size=10),
+        axis.text =  element_text(size=10),
+        legend.text = element_text(face = "italic", size=10),
+        legend.title = element_text(size=10),
+        legend.position = c(0.7,0.1))
+
+
+ontogeny_small_sp <- subset(ontogeny_data, species=="Lampanyctus crocodilus"|
+                                  species=="Melanostigma atlanticum"|
+                                  species=="Myctophum punctatum"|
+                                  species=="Arctozenus risso")
+
+small_sp <-ggplot(ontogeny_small_sp , aes(x=size, y=d15N_muscle_untreated))+
+  geom_point (alpha=0.3, size=0.7, aes(col=species)) + 
+  geom_smooth(method=lm, se=T, alpha=0.1, aes(col=species)) + 
+  paletteer::scale_color_paletteer_d("ggsci::category20_d3")+
+  xlab("Standard Length (cm)")+
+  ylab(expression({delta}^15*N~'\u2030'))+
+  labs(col="Small species")+
+  guides(fill="none")+
+  theme_minimal()+
+  ylim(c(7,13))+
+  theme(axis.title = element_text(size=10),
+        axis.text =  element_text(size=10),
+        legend.text = element_text(face = "italic", size=10),
+        legend.title = element_text(size=10),
+        legend.position = c(0.7,0.1))
+
+gridExtra::grid.arrange(large_sp,small_sp, ncol=2)
+```
+
+
+# Size in function of depth 
 ## density plot 
+-> data from the sampled individuals  
 -> binwidth = 1cm
 
-- significantly positive relationships: _M. atlanticum, L. crocodilus, N. kroyeri, M. punctatum_
-- significantly negative relationships: _A. risso, X. copei_
+results of linear models (lm(size~trawling_depth)):  
+
+- significantly positive relationships: _M. atlanticum, L. crocodilus, N. kroyeri, M. punctatum_  
+- significantly negative relationships: _A. risso, X. copei_  
 - non-significant relationships: _S. beanii, A. olfersii, S. koefoedi, L. macdonaldi_ (small size range), _A. carbo_ (small depth range), _S. boa_ (small depth range)
 
 ```{r}
@@ -314,9 +371,8 @@ lbls <- c(expression({delta}^15*N),"Depth","Size")
 ```{r}
 #| echo: true
 #| warning: false 
-#| fig-height: 7
-#| fig-width: 13
-par(mfrow= c(1,2))
+#| fig-height: 5
+#| fig-width: 5
 
 #Varpart
 lamp_cro <- subset (ontogeny_data, ontogeny_data$species == "Lampanyctus crocodilus")
@@ -650,7 +706,7 @@ ontogeny_summary <- ontogeny_data %>%
 ```
 
 # Classification
-- classification according to the slope coefficients of the different relationships
+- classification according to the slope coefficients of the different relationships (set a different value for non-significant relationships?)
 - 1 model (lm) performed /relationship/species
 ```{r}
 #| echo: true
@@ -665,25 +721,94 @@ slope_veg <- vegan::vegdist(slope_data, method = "jaccard", binary=FALSE)
 ggdendro::ggdendrogram(hclust(slope_veg, "ward.D2"), rotate = FALSE)
 ```
 - group 1 : species with negative relationship __size-depth__
-- group 2 : species with positive relationship __d15N-size__ & __size-depth__
-- group 3 : species with no significant relationship (except _A.olfersii_ __d15N-depth__)
-- group 4 : species with 1 significant relationship ( _S.beanii_ __d15N-depth__ & _N.kroyeri_ __size-depth__) 
+- group 2 : species with positive relationship __$\delta$<sup>15</sup>N-size__ & __size-depth__
+- group 3 : species with no significant relationship (except _A.olfersii_ __$\delta$<sup>15</sup>N-depth__)
+- group 4 : species with 1 significant relationship ( _S.beanii_ __$\delta$<sup>15</sup>N-depth__ & _N.kroyeri_ __size-depth__) 
 
 # Figures et graphiques à inclure dans le papier dans l'ordre : 
 
 - carte d'échantillonnage 
 
-- Tableau résumé de l'échantillonnage (familles, espèces, N, type de migration, range de taille et de profondeur, taille max fishbase et moyenne des valeurs de d15N avec SD)
+- Tableau résumé de l'échantillonnage (familles, espèces, N, type de migration, range de taille et de profondeur, taille max fishbase et moyenne des valeurs de $\delta$<sup>15</sup>N avec SD)
 
-- plot relations d15N-taille /sp (significatives + non significatives)
+- plot relations $\delta$<sup>15</sup>N-taille /sp (significatives + non significatives)
 
-- plot relation d15N-taille significatives sur le même plot 
+- plot relation $\delta$<sup>15</sup>N-taille significatives sur le même plot 
 
-- density plot/histogramme de la taille en fonction de la profondeur /sp
+- density plot/histogramme de la taille en fonction de la profondeur /sp: mieux d'ulitser que les données des individus prélevés (et pas la série complète) pour éviter les confusions ? 
 
-- Modèles /sp : SEM vs Varpart ? autre à tester ? 
+- Modèles /sp : SEM vs Varpart ? autre à tester ? (intéressant de prendre en compte le lien entre la distribution en taille des individus et la profondeur)
 
 - Tableau récapitulatif des résultats de significativité des modèles ? 
 
 - Cluster : quelles données d'entrée ? coefficient des modèles lm ou SEM ou Varpart ? 
 
+# Supplementary material
+## Distribution en taille des espèces (individus échantillonnés)
+```{r}
+#| echo: false
+#| warning: false 
+#| fig-height: 9
+#| fig-width: 14
+
+ggplot(ontogeny_data, aes(x=size)) +
+  geom_density(alpha=0.2, linewidth=0.7, col= "darkblue", fill= "darkblue")+
+  facet_wrap(~species, scale="free")+
+  theme_minimal()+
+  theme(strip.text.x = element_text(size=16,face="italic"),
+        strip.text.y = element_text(size=17),
+        axis.title = element_text(size=19),
+        axis.text =  element_text(size=14, color= "grey50"),
+        panel.background=element_rect(color="white"),
+        legend.title = element_text(size=14),
+        legend.text = element_text(size=14))+
+ # geom_vline(data = df2, mapping = aes(xintercept = Mean.SL)) +
+  guides(fill="none",col="none")+
+  xlab("Standard Length (cm)")
+```
+
+## Echantillonnage en fonction des années 
+- Plus de 90% de l'échantillonnage a été effectué entre 2019 et 2021 (et presque les 3/4 en 2021)
+```{r}
+#| echo: false
+#| warning: false 
+#| fig-height: 11
+#| fig-width: 21
+
+ontogeny_data$years <- as.character(ontogeny_data$years)
+ggplot(ontogeny_data, aes(x=years, y=d15N_muscle_untreated, col=trawling_depth,
+                     group=years))+
+  geom_point (alpha=0.5, size=2.5) +
+  geom_boxplot(fill="grey", col="grey", alpha=0.2)+
+  facet_wrap(~species, scale="free")+ 
+  xlab("Years")+
+  scale_color_gradient(low = "blue", high = "darkorange")+
+  ylab(expression({delta}^15*N~'\u2030'))+
+  guides(fill="none")+
+  theme_minimal()+
+  theme(strip.text.x = element_text(size=18,face="italic"),
+        axis.title = element_text(size=18),
+        axis.text =  element_text(size=18),
+        legend.title = element_text(size=18),
+        legend.text = element_text(size=18))+
+  labs(col="Depth (m)")
+```
+# Plan intro
+
+__1. Importance of deep-pelagic fish in food webs__
+
+- different roles : consummation of zooplankton, source of prey for top predators and benthic/demersal speices  
+
+- Therefore, better understand their trophic ecology is essential to quantified their role in the functioning of the ecosystem and the services ecosystem they provide... 
+
+__2. Use of stable isotope to characterized their trophic ecology__ 
+
+- Description of the use of $\delta$<sup>15</sup>N values in trophic ecology
+
+__3.	However, trophic ecology of deep-pelagic fish is challenging to study__ 
+
+- Variations in $\delta$<sup>15</sup>N values due to the environment: microbial degradation ...
+
+- In addition, meso- and bathypelagic fish exhibit large variety of feeding patterns adding a level of complexity : migratory behavior, ontogenetic changes in diet, ontogenetic shift in vertical distribution, link with the bottom
+
+__4. Therefore, use of (path) models ...__ 
