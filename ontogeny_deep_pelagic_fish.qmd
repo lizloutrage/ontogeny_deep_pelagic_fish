@@ -1,17 +1,117 @@
 ---
 title: "Ontogeny of deep pelagic fish"
-format: html
+format: 
+  html:
+    self-contained: true
+    code-fold: true
 editor: visual
 theme: minty
+execute:
+  warning: false
+  message : false
 toc: true
 toc-title: Sections
 toc-location: left
 page-layout: full
 ---
 
+# Questions 
+
+- Are there species that present ontogenetic shifts in their size distribution as a function of depth?
+
+- Is there a linear relationship between the size of individuals and their $\delta$<sup>15</sup>N values at the community level? Within the different depth layers (epipelagic, upper-mesopelagic, lower-mesopelagic and bathypelagic)? At the specific level (increase in trophic level and therefore change in diet over the course of life)?
+
+- At the specific level, are the values in $\delta$<sup>15</sup>N more influenced by the depth (due to bacterial degradation in particular) or by the size of the individuals (increase in the trophic level )?
+
+- Depending on all these relationships, can we deduce typologies of species (differences in life strategies)?
+
+
+# Size distribution as a function of depth
+
+## Density plot by depth layer
+
+-   with the complete data set (2002-2021)
+-   binwidth = 1cm
+-   median
+-   To test the significant difference in size distribution as a function of depth: test between the depth layer or use of linear models (lm(size\~depth))?
+
 ```{r}
 #| echo: false
+#| fig-height: 13
+#| fig-width: 20
+library(tidyr)
+library(ggplot2)
+
+size_distribution_complete <- utils::read.csv(here::here("data", "size_distribution_complete.csv"), sep = ";", header = T,dec = ".")
+
+size_distribution_complete$depth_layer <- factor(size_distribution_complete$depth_layer, 
+                                  levels = c("epipelagic","upper_mesopelagic",
+                                         "lower_mesopelagic","bathypelagic"),
+                                  labels = c("Epipelagic","Upper mesopelagic",
+                                          "Lower mesopelagic","Bathypelagic"))
+
+size_distribution_complete$species <- factor(size_distribution_complete$species,
+                                                   levels = c("Notoscopelus kroyeri",
+                                                              "Myctophum punctatum",
+                                                              "Melanostigma atlanticum",
+                                                               "Lampanyctus crocodilus",
+                                                              "Arctozenus risso",
+                                                              "Xenodermichthys copei",
+                                                              "Serrivomer beanii",
+                                                              "Argyropelecus olfersii",
+                                                              "Stomias boa",
+                                                              "Searsia koefoedi",
+                                                              "Aphanopus carbo",
+                                                              "Lampanyctus macdonaldi"),
+                                        labels = c("N.kroyeri",
+                                                              "M.punctatum",
+                                                              "M.atlanticum",
+                                                               "L.crocodilus",
+                                                              "A.risso",
+                                                              "X.copei",
+                                                              "S.beanii",
+                                                              "A.olfersii",
+                                                              "S.boa",
+                                                              "S.koefoedi",
+                                                              "A.carbo",
+                                                              "L.macdonaldi"))
+
+ df2 <- size_distribution_complete %>%
+   dplyr::group_by(species, depth_layer) %>%
+   dplyr::summarise(median_sl = median(size))
+
+ggplot(size_distribution_complete, aes(x=size)) +
+  geom_density(alpha=0.3, aes(col=depth_layer), linewidth=1)+
+  geom_histogram(aes(y=..density.., col=depth_layer, fill=depth_layer), alpha=0.3, 
+                 position="identity", binwidth = 1)+
+  paletteer::scale_color_paletteer_d("jcolors::pal10")+
+  paletteer::scale_fill_paletteer_d("jcolors::pal10")+
+  facet_grid(depth_layer~species, scale="free")+
+  theme_minimal()+
+  theme(strip.text.x = element_text(size=16,face="italic"),
+        strip.text.y = element_text(size=17),
+        axis.title = element_text(size=19),
+        axis.text =  element_text(size=14, color= "grey50"),
+        panel.background=element_rect(color="white"),
+        legend.title = element_text(size=14),
+        legend.text = element_text(size=14))+
+  geom_vline(data = df2, aes(xintercept = median_sl, col= depth_layer), size= 1.3, 
+             linetype="dashed") +
+  guides(fill="none",col="none")+
+  xlab("Standard Length (cm)")
+```
+
+## Linear models
+
+-   Graph not to be included in the paper but results of linear relationships in the final table
+
+```{r}
+#| echo: false
+#| fig-height: 15
+#| fig-width: 20
+
 ontogeny_data <- utils::read.csv(here::here("data", "ontogeny.csv"), sep = ";", header = T,dec = ",")
+
 ontogeny_data$species <- factor(ontogeny_data$species,
                                levels = c("Stomias_boa",
                                           "Lampanyctus_crocodilus",
@@ -37,12 +137,105 @@ ontogeny_data$species <- factor(ontogeny_data$species,
                                           "Notoscopelus kroyeri",
                                           "Xenodermichthys copei",
                                           "Arctozenus risso"))
+
+ggplot(ontogeny_data , aes(x=trawling_depth, y=size))+
+  geom_point (alpha=0.4, col="black", size=3) + 
+  geom_smooth(method=lm, se=T, alpha=0.2, col= alpha("darkblue",0.7), size= 1.5) +
+  facet_wrap(~species, scale = "free", ncol=3)+ 
+  ggpmisc::stat_poly_eq(formula = y ~ x, 
+                        aes(label = paste(..eq.label.., ..rr.label.., ..p.value.label.. 
+                                          , ..n.label..,sep = "*`,`~")),
+                        parse = TRUE,
+                        size= 6,
+                        label.x.npc = "right",
+                        label.y.npc = "bottom",
+                        vstep = -0.0005)+ 
+  ylab("Standard length (cm)")+
+  xlab("Trawling depth (m)")+
+  guides(color="none", fill="none")+
+  theme_minimal()+
+  theme(strip.text.x = element_text(size=20,face="italic"),
+        axis.title = element_text(size=20),
+        axis.text =  element_text(size=20))
+
 ```
 
-## $\delta$<sup>15</sup>N - size relationship
+# $\delta$<sup>15</sup>N-size relationships
 
-- significant relationships
-- $\delta$<sup>15</sup>N axis standardized
+## At community level
+
+-   X axis (size) in log
+
+```{r}
+#| echo: false
+
+ggplot(ontogeny_data , aes(x=size, y=d15N_muscle_untreated))+
+  geom_point (alpha=0.4) + 
+  geom_smooth(method=lm, se=T, alpha=0.2, col= alpha("darkblue",0.7)) + 
+  ggpmisc::stat_poly_eq(formula = y ~ x, 
+                        aes(label = paste(..eq.label.., ..rr.label.., ..p.value.label.. 
+                                          , ..n.label..,sep = "*`,`~")),
+                        parse = TRUE,
+                        size=3,
+                        label.x.npc = "right",
+                        label.y.npc = "bottom",
+                        vstep = -0.0005)+ 
+  scale_x_continuous(trans = 'log2') +
+  xlab(bquote(log[2]~"standard length (cm)"))+
+  ylab(expression({delta}^15*N~'\u2030'))+
+  ylim(c(7,13))+
+  guides(fill="none")+
+  theme_minimal()+
+  theme(strip.text.x = element_text(size=10,face="italic"),
+        axis.title = element_text(size=10),
+        axis.text =  element_text(size=10))
+```
+
+## At community level - by depth layer
+
+-   X axis (size) in log<sub>2</sub>
+-   All axis fixed
+
+```{r}
+#| echo: false
+#| fig-height: 7
+#| fig-width: 11
+
+ontogeny_data$depth_layer <- factor(ontogeny_data$depth_layer, 
+                                  levels = c("epipelagic","upper_mesopelagic",
+                                         "lower_mesopelagic","bathypelagic"),
+                                  labels = c("Epipelagic","Upper mesopelagic",
+                                          "Lower mesopelagic","Bathypelagic"))
+
+ggplot(ontogeny_data , aes(x=size, y=d15N_muscle_untreated))+
+  geom_point (alpha=0.7, aes(col=depth_layer)) + 
+  geom_smooth(method=lm, se=T, alpha=0.2, aes(col=depth_layer, fill= depth_layer)) +
+  facet_wrap(~depth_layer, ncol=2)+ 
+  ggpmisc::stat_poly_eq(formula = y ~ x, 
+                        aes(label = paste(..eq.label.., ..rr.label.., ..p.value.label.. 
+                                          , ..n.label..,sep = "*`,`~")),
+                        parse = TRUE,
+                        size=3,
+                        label.x.npc = "right",
+                        label.y.npc = "bottom",
+                        vstep = -0.0005)+ 
+  scale_x_continuous(trans = 'log2') +
+  xlab(bquote(log[2]~"standard length (cm)"))+
+  paletteer::scale_color_paletteer_d("jcolors::pal10")+
+  paletteer::scale_fill_paletteer_d("jcolors::pal10")+
+ # xlab("Standard Length (cm)")+
+  ylab(expression({delta}^15*N~'\u2030'))+
+  ylim(c(7,13))+
+  guides(color="none", fill="none")+
+  theme_minimal()+
+  theme(strip.text.x = element_text(size=10),
+        axis.title = element_text(size=10),
+        axis.text =  element_text(size=10))
+```
+
+## At species level
+
+-   $\delta$<sup>15</sup>N axis standardized
 
 ```{r}
 #| echo: false
@@ -51,6 +244,7 @@ ontogeny_data$species <- factor(ontogeny_data$species,
 #| fig-width: 10
 
 library(ggplot2)
+
 ontogeny_significant <- subset(ontogeny_data, species=="Lampanyctus crocodilus"|
                                          species=="Aphanopus carbo"|
                                          species=="Melanostigma atlanticum" |
@@ -91,9 +285,6 @@ ggplot(ontogeny_significant , aes(x=size, y=d15N_muscle_untreated))+
 
 ```
 
-
-- non significant relationships
-
 ```{r}
 #| echo: false
 #| warning: false
@@ -133,246 +324,57 @@ ggplot(ontogeny_non_significant , aes(x=size, y=d15N_muscle_untreated))+
 
 ```
 
+## Variation coefficients
 
-### Summarise results 
-#### $\delta$<sup>15</sup>N size relationship
 ```{r}
-#| echo: true
-#| warning: false
-library(tidyr)
-library(dplyr)
-ontogeny_d15n_size <- ontogeny_data %>%
-  group_by(species) %>%
-  do(broom::tidy(lm(d15N_muscle_untreated~size, data =.)))
-DT::datatable(ontogeny_d15n_size)
+
+cv <- function(x){
+  (sd(x)/mean(x))*100
+}
+
+coeff_var <- aggregate(d15N_muscle_untreated ~ species, 
+                       data = ontogeny_data,
+                       FUN = cv)
+DT::datatable(coeff_var)
 ```
 
-#### $\delta$<sup>15</sup>N depth relationship
-```{r}
-#| echo: true
-#| warning: false
-ontogeny_d15n_depth <- ontogeny_data %>%
-  group_by(species) %>%
-  do(broom::tidy(lm(d15N_muscle_untreated~trawling_depth, data =.)))
-DT::datatable(ontogeny_d15n_depth)
-```
+# $\delta$<sup>15</sup>N in function of depth
 
-#### size depth relationship
-```{r}
-#| echo: true
-#| warning: false
-ontogeny_size_depth <- ontogeny_data %>%
-  group_by(species) %>%
-  do(broom::tidy(lm(size~trawling_depth, data =.)))
-DT::datatable(ontogeny_size_depth)
-```
-
-
-### All relationship on 1 plot
 ```{r}
 #| echo: false
+#| warning: false
+#| fig-height: 6
+#| fig-width: 8
+
+ggplot(ontogeny_data , aes(x=trawling_depth, y=d15N_muscle_untreated))+
+  geom_point (alpha=0.4) + 
+  geom_smooth(method=lm, se=T, alpha=0.2, col= "darkblue") +
+  ggpmisc::stat_poly_eq(formula = y ~ x, 
+                        aes(label = paste(..eq.label.., ..rr.label.., ..p.value.label.. 
+                                          , ..n.label..,sep = "*`,`~")),
+                        parse = TRUE,
+                        size=3,
+                        label.x.npc = "right",
+                        label.y.npc = "bottom",
+                        vstep = -0.0005)+ 
+  xlab("Trawling depth (m)")+
+  ylab(expression({delta}^15*N~'\u2030'))+
+  guides(color="none", fill="none")+
+  theme_minimal()+
+  theme(strip.text.x = element_text(size=10),
+        axis.title = element_text(size=10),
+        axis.text =  element_text(size=10))
+```
+
+# Variation partitionning
+
+## *Lampanyctus crocodilus*
+
+```{r}
+#| echo: true
 #| warning: false 
 #| fig-height: 6
-#| fig-width: 10
-ggplot(ontogeny_data , aes(x=size, y=d15N_muscle_untreated))+
-  geom_point (alpha=0.3, size=0.7, aes(col=species)) + 
-  geom_smooth(method=lm, se=T, alpha=0.1, aes(col=species)) + 
-  paletteer::scale_color_paletteer_d("ggsci::category20_d3")+
-  xlab("Standard Length (cm)")+
-  ylab(expression({delta}^15*N~'\u2030'))+
-  labs(col="Species")+
-  guides(fill="none")+
-  theme_minimal()+
-  theme(axis.title = element_text(size=10),
-        axis.text =  element_text(size=10),
-        legend.text = element_text(face = "italic"))
-```
-
-### Significant relationship on 1 plot
-_Arctozenus risso_ was the only species with a significantly negative relationship
-
-
-```{r}
-#| echo: false
-#| warning: false 
-#| fig-height: 6
-#| fig-width: 10
-
-ontogeny_significant <- subset(ontogeny_data, species=="Lampanyctus crocodilus"|
-                                  species=="Aphanopus carbo"|
-                                  species=="Melanostigma atlanticum"|
-                                  species=="Serrivomer beanii"|
-                                  species=="Stomias boa"|
-                                  species=="Myctophum punctatum"|
-                                  species=="Arctozenus risso")
-
-ggplot(ontogeny_significant , aes(x=size, y=d15N_muscle_untreated))+
-  geom_point (alpha=0.3, size=0.7, aes(col=species)) + 
-  geom_smooth(method=lm, se=T, alpha=0.1, aes(col=species)) + 
-  paletteer::scale_color_paletteer_d("ggsci::category20_d3")+
-  xlab("Standard Length (cm)")+
-  ylab(expression({delta}^15*N~'\u2030'))+
-  labs(col="Species")+
-  guides(fill="none")+
-  theme_minimal()+
-  theme(axis.title = element_text(size=10),
-        axis.text =  element_text(size=10),
-        legend.text = element_text(face = "italic"))
-```
-
-#### By separating large and small species
-```{r}
-#| echo: false
-#| warning: false 
-#| fig-height: 6
-#| fig-width: 12
-
-ontogeny_large_sp <- subset(ontogeny_data, species=="Aphanopus carbo"|
-                                  species=="Serrivomer beanii"|
-                                  species=="Stomias boa")
-
-large_sp <- ggplot(ontogeny_large_sp , aes(x=size, y=d15N_muscle_untreated))+
-  geom_point (alpha=0.3, size=0.7, aes(col=species)) + 
-  geom_smooth(method=lm, se=T, alpha=0.1, aes(col=species)) + 
-  paletteer::scale_color_paletteer_d("ggsci::category20_d3")+
-  xlab("Standard Length (cm)")+
-  ylab(expression({delta}^15*N~'\u2030'))+
-  labs(col="Large species")+
-  guides(fill="none")+
-  ylim(c(7,13))+
-  theme_minimal()+
-  theme(axis.title = element_text(size=10),
-        axis.text =  element_text(size=10),
-        legend.text = element_text(face = "italic", size=10),
-        legend.title = element_text(size=10),
-        legend.position = c(0.7,0.1))
-
-
-ontogeny_small_sp <- subset(ontogeny_data, species=="Lampanyctus crocodilus"|
-                                  species=="Melanostigma atlanticum"|
-                                  species=="Myctophum punctatum"|
-                                  species=="Arctozenus risso")
-
-small_sp <-ggplot(ontogeny_small_sp , aes(x=size, y=d15N_muscle_untreated))+
-  geom_point (alpha=0.3, size=0.7, aes(col=species)) + 
-  geom_smooth(method=lm, se=T, alpha=0.1, aes(col=species)) + 
-  paletteer::scale_color_paletteer_d("ggsci::category20_d3")+
-  xlab("Standard Length (cm)")+
-  ylab(expression({delta}^15*N~'\u2030'))+
-  labs(col="Small species")+
-  guides(fill="none")+
-  theme_minimal()+
-  ylim(c(7,13))+
-  theme(axis.title = element_text(size=10),
-        axis.text =  element_text(size=10),
-        legend.text = element_text(face = "italic", size=10),
-        legend.title = element_text(size=10),
-        legend.position = c(0.7,0.1))
-
-gridExtra::grid.arrange(large_sp,small_sp, ncol=2)
-```
-
-
-# Size in function of depth 
-## density plot 
--> data from the sampled individuals  
--> binwidth = 1cm
-
-results of linear models (lm(size~trawling_depth)):  
-
-- significantly positive relationships: _M. atlanticum, L. crocodilus, N. kroyeri, M. punctatum_  
-- significantly negative relationships: _A. risso, X. copei_  
-- non-significant relationships: _S. beanii, A. olfersii, S. koefoedi, L. macdonaldi_ (small size range), _A. carbo_ (small depth range), _S. boa_ (small depth range)
-
-```{r}
-#| echo: false
-#| warning: false 
-#| fig-height: 13
-#| fig-width: 20
-
-ontogeny_data_density <- ontogeny_data
-ontogeny_data_density$depth_layer <- factor(ontogeny_data_density$depth_layer, 
-                                  levels = c("epipelagic","upper_mesopelagic",
-                                         "lower_mesopelagic","bathypelagic"),
-                                  labels = c("Epipelagic","Upper mesopelagic",
-                                          "Lower mesopelagic","Bathypelagic"))
-
-ontogeny_data_density$species <- factor(ontogeny_data_density$species,
-                                                   levels = c("Melanostigma atlanticum",
-                                                               "Lampanyctus crocodilus",
-                                                              "Notoscopelus kroyeri",
-                                                              "Myctophum punctatum",
-                                                              "Arctozenus risso",
-                                                              "Xenodermichthys copei",
-                                                              "Serrivomer beanii",
-                                                              "Argyropelecus olfersii",
-                                                              "Searsia koefoedi",
-                                                               "Lampanyctus macdonaldi",
-                                                              "Aphanopus carbo",
-                                                              "Stomias boa"),
-                                        labels = c("M.atlanticum",
-                                                               "L.crocodilus",
-                                                              "N.kroyeri",
-                                                              "M.punctatum",
-                                                              "A.risso",
-                                                              "X.copei",
-                                                              "S.beanii",
-                                                              "A.olfersii",
-                                                              "S.koefoedi",
-                                                               "L.macdonaldi",
-                                                              "A.carbo",
-                                                              "S.boa"))
-
-# df2 <- ontogeny_data %>%
-#   group_by(species, depth_layer) %>%
-#   summarise(Mean.SL = mean(size))
-
-ggplot(ontogeny_data_density, aes(x=size)) +
-  geom_density(alpha=0.3, aes(col=depth_layer), linewidth=0.7)+
-  geom_histogram(aes(y=..density.., col=depth_layer, fill=depth_layer), alpha=0.2, 
-                 position="identity", binwidth = 1)+
-  facet_grid(depth_layer~species, scale="free")+
-  theme_minimal()+
-  theme(strip.text.x = element_text(size=16,face="italic"),
-        strip.text.y = element_text(size=17),
-        axis.title = element_text(size=19),
-        axis.text =  element_text(size=14, color= "grey50"),
-        panel.background=element_rect(color="white"),
-        legend.title = element_text(size=14),
-        legend.text = element_text(size=14))+
- # geom_vline(data = df2, mapping = aes(xintercept = Mean.SL)) +
-  guides(fill="none",col="none")+
-  xlab("Standard Length (cm)")
-```
-
-
-# Variation partitioning _vs_ SEM
-
-__Varpart (cf workshop QCBS) :__ 
-
-- The fraction between size and depth (overlap between the two circles) does not represent the interaction between the two variables (it is the part of the variance that cannot be attributed to depth or size separately)
-
-- Therefore, we cannot test the significance of this relationship
-
-## _Lampanyctus crocodilus_ 
-
-```{r}
-#| echo: false
-#| warning: false
-
-m2 <- 'd15N ~ Depth + Size 
-Depth~Size'
-# m2 <- 'd15N ~ Profondeur + Size'
-
-#labels 
-lbls <- c(expression({delta}^15*N),"Depth","Size")
-```
-
-```{r}
-#| echo: true
-#| warning: false 
-#| fig-height: 5
-#| fig-width: 5
+#| fig-width: 6
 
 #Varpart
 lamp_cro <- subset (ontogeny_data, ontogeny_data$species == "Lampanyctus crocodilus")
@@ -385,32 +387,29 @@ plot(lamp_cro_part,
      bg = c("#072AC8", "#0B5345"), alpha = 100, # colour the circles
      digits = 2, # only show 2 digits
      cex = 1.4)
-
-#SEM
-lamp_cro_scale <- as.data.frame(cbind(scale(lamp_cro$trawling_depth), 
-                  scale(lamp_cro$d15N_muscle_untreated), 
-                  scale(lamp_cro$size)))
-
-colnames(lamp_cro_scale)<- c("Depth","d15N","Size")
-
-fit2 <- lavaan::sem(m2, data=lamp_cro_scale)
-lavaan::summary(fit2)
-semPlot::semPaths(fit2, "par", residuals = F,nodeLabels = lbls, edge.label.cex = 2, 
-         fade=F, posCol="#3B9152", sizeMan = 12)
-
 ```
 
+### Significance testing
 
-## _Myctophum punctatum_
+#### \[a\] Depth alone
 
-- SEM: depth-size significant & d15N-depth non significant 
-- varpart: the opposite
+```{r}
+vegan::anova.cca(vegan::rda(lamp_cro$d15N_muscle_untreated, lamp_cro$trawling_depth, lamp_cro$size))
+```
+
+#### \[c\] Size alone
+
+```{r}
+vegan::anova.cca(vegan::rda(lamp_cro$d15N_muscle_untreated, lamp_cro$size, lamp_cro$trawling_depth))
+```
+
+## *Myctophum punctatum*
+
 ```{r}
 #| echo: false
 #| warning: false
-#| fig-height: 7
-#| fig-width: 13
-par(mfrow= c(1,2))
+#| fig-height: 6
+#| fig-width: 6
 
 #Varpart
 myct_pun <- subset(ontogeny_data, ontogeny_data$species == "Myctophum punctatum")
@@ -421,29 +420,27 @@ plot(myct_pun_part,
      bg = c("#072AC8", "#0B5345"), alpha = 100, # color the circles
      digits = 2, # only show 2 digits
      cex = 1.4)
-
-#SEM
-myct_pun_scale <- as.data.frame(cbind(scale(myct_pun$trawling_depth), 
-                  scale(myct_pun$d15N_muscle_untreated), 
-                  scale(myct_pun$size)))
-
-colnames(myct_pun_scale)<- c("Depth","d15N","Size")
-
-fit2 <- lavaan::sem(m2, data=myct_pun_scale)
-#lavaan::summary(fit2)
-semPlot::semPaths(fit2, "par", residuals = F,nodeLabels = lbls, edge.label.cex = 2, 
-         fade=F, posCol="#3B9152", sizeMan = 12)
 ```
 
+```{r}
+#| echo: false
+#| output: false
+vegan::anova.cca(vegan::rda(myct_pun$d15N_muscle_untreated, myct_pun$trawling_depth, myct_pun$size))
+```
 
-## _Melanostigma atlanticum_ 
+```{r}
+#| echo: false
+#| output: false
+vegan::anova.cca(vegan::rda(myct_pun$d15N_muscle_untreated, myct_pun$size, myct_pun$trawling_depth))
+```
+
+## *Melanostigma atlanticum*
 
 ```{r}
 #| echo: false
 #| warning: false
-#| fig-height: 7
-#| fig-width: 13
-par(mfrow= c(1,2))
+#| fig-height: 6
+#| fig-width: 6
 
 #Varpart
 mela_atl <- subset(ontogeny_data, ontogeny_data$species == "Melanostigma atlanticum")
@@ -455,27 +452,29 @@ plot(mela_atl_part,
      digits = 2, # only show 2 digits
      cex = 1.4)
 
-#SEM
-mela_atl_scale <- as.data.frame(cbind(scale(mela_atl$trawling_depth), 
-                  scale(mela_atl$d15N_muscle_untreated), 
-                  scale(mela_atl$size)))
-
-colnames(mela_atl_scale)<- c("Depth","d15N","Size")
-
-fit2 <- lavaan::sem(m2, data=mela_atl_scale)
-#lavaan::summary(fit2)
-semPlot::semPaths(fit2, "par", residuals = F,nodeLabels = lbls, edge.label.cex = 2, 
-         fade=F, posCol="#3B9152", sizeMan = 12)
 ```
 
+```{r}
+#| echo: false
+#| output: false
+vegan::anova.cca(vegan::rda(mela_atl$d15N_muscle_untreated, mela_atl$trawling_depth,
+                            mela_atl$size))
+```
 
-## _Serrivomer beanii_
+```{r}
+#| echo: false
+#| output: false
+vegan::anova.cca(vegan::rda(mela_atl$d15N_muscle_untreated, mela_atl$size,
+                            mela_atl$trawling_depth))
+```
+
+## *Serrivomer beanii*
+
 ```{r}
 #| echo: false
 #| warning: false
-#| fig-height: 7
-#| fig-width: 13
-par(mfrow= c(1,2))
+#| fig-height: 6
+#| fig-width: 6
 
 #Varpart
 serr_bea <- subset(ontogeny_data, ontogeny_data$species == "Serrivomer beanii")
@@ -487,28 +486,29 @@ plot(serr_bea_part,
      digits = 2, # only show 2 digits
      cex = 1.4)
 
-#SEM
-serr_bea_scale <- as.data.frame(cbind(scale(serr_bea$trawling_depth), 
-                  scale(serr_bea$d15N_muscle_untreated), 
-                  scale(serr_bea$size)))
-
-colnames(serr_bea_scale)<- c("Depth","d15N","Size")
-
-fit2 <- lavaan::sem(m2, data=serr_bea_scale)
-#lavaan::summary(fit2)
-semPlot::semPaths(fit2, "par", residuals = F,nodeLabels = lbls, edge.label.cex = 2, 
-         fade=F, posCol="#3B9152", sizeMan = 12)
 ```
 
+```{r}
+#| echo: false
+#| output: false
+vegan::anova.cca(vegan::rda(serr_bea$d15N_muscle_untreated, serr_bea$trawling_depth,
+                            serr_bea$size))
+```
 
-## _Argyropelecus olfersii_
+```{r}
+#| echo: false
+#| output: false
+vegan::anova.cca(vegan::rda(serr_bea$d15N_muscle_untreated, serr_bea$size,
+                            serr_bea$trawling_depth))
+```
+
+## *Argyropelecus olfersii*
 
 ```{r}
 #| echo: false
 #| warning: false
-#| #| fig-height: 7
-#| fig-width: 13
-par(mfrow= c(1,2))
+#| #| fig-height: 6
+#| fig-width: 6
 
 #Varpart
 argy_olf <- subset(ontogeny_data, ontogeny_data$species == "Argyropelecus olfersii")
@@ -519,29 +519,29 @@ plot(argy_olf_part,
      bg = c("#072AC8", "#0B5345"), alpha = 100, # colour the circles
      digits = 2, # only show 2 digits
      cex = 1.4)
-
-#SEM
-argy_olf_scale <- as.data.frame(cbind(scale(argy_olf$trawling_depth), 
-                  scale(argy_olf$d15N_muscle_untreated), 
-                  scale(argy_olf$size)))
-
-colnames(argy_olf_scale)<- c("Depth","d15N","Size")
-
-fit2 <- lavaan::sem(m2, data=argy_olf_scale)
-#lavaan::summary(fit2)
-semPlot::semPaths(fit2, "par", residuals = F,nodeLabels = lbls, edge.label.cex = 2, 
-         fade=F, posCol="#3B9152", sizeMan = 12)
 ```
 
+```{r}
+#| echo: false
+#| output: false
+vegan::anova.cca(vegan::rda(argy_olf$d15N_muscle_untreated, argy_olf$trawling_depth,
+                            argy_olf$size))
+```
 
-## _Lampanyctus macdonaldi_
+```{r}
+#| echo: false
+#| output: false
+vegan::anova.cca(vegan::rda(argy_olf$d15N_muscle_untreated, argy_olf$size,
+                            argy_olf$trawling_depth))
+```
+
+## *Lampanyctus macdonaldi*
 
 ```{r}
 #| echo: false
 #| warning: false
-#| fig-height: 7
-#| fig-width: 13
-par(mfrow= c(1,2))
+#| fig-height: 6
+#| fig-width: 6
 
 #Varpart
 lamp_mac <- subset(ontogeny_data, ontogeny_data$species == "Lampanyctus macdonaldi")
@@ -553,27 +553,29 @@ plot(lamp_mac_part,
      digits = 2, # only show 2 digits
      cex = 1.4)
 
-#SEM
-lamp_mac_scale <- as.data.frame(cbind(scale(lamp_mac$trawling_depth), 
-                  scale(lamp_mac$d15N_muscle_untreated), 
-                  scale(lamp_mac$size)))
-
-colnames(lamp_mac_scale)<- c("Depth","d15N","Size")
-
-fit2 <- lavaan::sem(m2, data=lamp_mac_scale)
-#lavaan::summary(fit2)
-semPlot::semPaths(fit2, "par", residuals = F,nodeLabels = lbls, edge.label.cex = 2, 
-         fade=F, posCol="#3B9152", sizeMan = 12)
 ```
 
-## _Searsia koefoedi_
+```{r}
+#| echo: false
+#| output: false
+vegan::anova.cca(vegan::rda(lamp_mac$d15N_muscle_untreated, lamp_mac$trawling_depth,
+                            lamp_mac$size))
+```
+
+```{r}
+#| echo: false
+#| output: false
+vegan::anova.cca(vegan::rda(lamp_mac$d15N_muscle_untreated, lamp_mac$size,
+                            lamp_mac$trawling_depth))
+```
+
+## *Searsia koefoedi*
 
 ```{r}
 #| echo: false
 #| warning: false
-#| fig-height: 7
-#| fig-width: 13
-par(mfrow= c(1,2))
+#| fig-height: 6
+#| fig-width: 6
 
 #Varpart
 sear_koe <- subset(ontogeny_data, ontogeny_data$species == "Searsia koefoedi")
@@ -584,29 +586,29 @@ plot(sear_koe_part,
      bg = c("#072AC8", "#0B5345"), alpha = 100, # colour the circles
      digits = 2, # only show 2 digits
      cex = 1.4)
-
-#SEM
-sear_koe_scale <- as.data.frame(cbind(scale(sear_koe$trawling_depth), 
-                  scale(sear_koe$d15N_muscle_untreated), 
-                  scale(sear_koe$size)))
-
-colnames(sear_koe_scale)<- c("Depth","d15N","Size")
-
-fit2 <- lavaan::sem(m2, data=sear_koe_scale)
-#lavaan::summary(fit2)
-semPlot::semPaths(fit2, "par", residuals = F,nodeLabels = lbls, edge.label.cex = 2, 
-         fade=F, posCol="#3B9152", sizeMan = 12)
 ```
 
+```{r}
+#| echo: false
+#| output: false
+vegan::anova.cca(vegan::rda(sear_koe$d15N_muscle_untreated, sear_koe$trawling_depth,
+                            sear_koe$size))
+```
 
-## _Notoscopelus kroyeri_
+```{r}
+#| echo: false
+#| output: false
+vegan::anova.cca(vegan::rda(sear_koe$d15N_muscle_untreated, sear_koe$size,
+                            sear_koe$trawling_depth))
+```
+
+## *Notoscopelus kroyeri*
 
 ```{r}
 #| echo: false
 #| warning: false
-#| fig-height: 7
-#| fig-width: 13
-par(mfrow= c(1,2))
+#| fig-height: 6
+#| fig-width: 6
 
 #Varpart
 noto_kro <- subset(ontogeny_data, ontogeny_data$species == "Notoscopelus kroyeri")
@@ -617,28 +619,29 @@ plot(noto_kro_part,
      bg = c("#072AC8", "#0B5345"), alpha = 100, # colour the circles
      digits = 2, # only show 2 digits
      cex = 1.4)
-
-#SEM
-noto_kro_scale <- as.data.frame(cbind(scale(noto_kro$trawling_depth), 
-                  scale(noto_kro$d15N_muscle_untreated), 
-                  scale(noto_kro$size)))
-
-colnames(noto_kro_scale)<- c("Depth","d15N","Size")
-fit2 <- lavaan::sem(m2, data=noto_kro_scale)
-#lavaan::summary(fit2)
-semPlot::semPaths(fit2, "par", residuals = F,nodeLabels = lbls, edge.label.cex = 2, 
-         fade=F, posCol="#3B9152", sizeMan = 12)
 ```
 
+```{r}
+#| echo: false
+#| output: false
+vegan::anova.cca(vegan::rda(noto_kro$d15N_muscle_untreated, noto_kro$trawling_depth,
+                            noto_kro$size))
+```
 
-## _Xenodermichthys copei_
+```{r}
+#| echo: false
+#| output: false
+vegan::anova.cca(vegan::rda(noto_kro$d15N_muscle_untreated, noto_kro$size,
+                            noto_kro$trawling_depth))
+```
+
+## *Xenodermichthys copei*
 
 ```{r}
 #| echo: false
 #| warning: false
-#| fig-height: 7
-#| fig-width: 13
-par(mfrow= c(1,2))
+#| fig-height: 6
+#| fig-width: 6
 
 #Varpart
 xeno_cop <- subset(ontogeny_data, ontogeny_data$species == "Xenodermichthys copei")
@@ -649,28 +652,29 @@ plot(xeno_cop_part,
      bg = c("#072AC8", "#0B5345"), alpha = 100, # colour the circles
      digits = 2, # only show 2 digits
      cex = 1.4)
-
-#SEM
-xeno_cop_scale <- as.data.frame(cbind(scale(xeno_cop$trawling_depth), 
-                  scale(xeno_cop$d15N_muscle_untreated), 
-                  scale(xeno_cop$size)))
-
-colnames(xeno_cop_scale)<- c("Depth","d15N","Size")
-fit2 <- lavaan::sem(m2, data=xeno_cop_scale)
-#lavaan::summary(fit2)
-semPlot::semPaths(fit2, "par", residuals = F,nodeLabels = lbls, edge.label.cex = 2, 
-         fade=F, posCol="#3B9152", sizeMan = 12)
 ```
 
+```{r}
+#| echo: false
+#| output: false
+vegan::anova.cca(vegan::rda(xeno_cop$d15N_muscle_untreated, xeno_cop$trawling_depth,
+                            xeno_cop$size))
+```
 
-## _Arctozenus risso_
+```{r}
+#| echo: false
+#| output: false
+vegan::anova.cca(vegan::rda(xeno_cop$d15N_muscle_untreated, xeno_cop$size,
+                            xeno_cop$trawling_depth))
+```
+
+## *Arctozenus risso*
 
 ```{r}
 #| echo: false
 #| warning: false
-#| fig-height: 7
-#| fig-width: 13
-par(mfrow= c(1,2))
+#| fig-height: 6
+#| fig-width: 6
 
 #Varpart
 arct_ris <- subset(ontogeny_data, ontogeny_data$species == "Arctozenus risso")
@@ -681,78 +685,88 @@ plot(arct_ris_part,
      bg = c("#072AC8", "#0B5345"), alpha = 100, # colour the circles
      digits = 2, # only show 2 digits
      cex = 1.4)
-
-#SEM
-arct_ris_scale <- as.data.frame(cbind(scale(arct_ris$trawling_depth), 
-                  scale(arct_ris$d15N_muscle_untreated), 
-                  scale(arct_ris$size)))
-
-colnames(arct_ris_scale)<- c("Depth","d15N","Size")
-fit2 <- lavaan::sem(m2, data=arct_ris_scale)
-#lavaan::summary(fit2)
-semPlot::semPaths(fit2, "par", residuals = F,nodeLabels = lbls, edge.label.cex = 2, 
-         fade=F, posCol="#3B9152", sizeMan = 12)
 ```
 
+```{r}
+#| echo: false
+#| output: false
+vegan::anova.cca(vegan::rda(arct_ris$d15N_muscle_untreated, arct_ris$trawling_depth,
+                            arct_ris$size))
+```
+
+```{r}
+#| echo: false
+#| output: false
+vegan::anova.cca(vegan::rda(arct_ris$d15N_muscle_untreated, arct_ris$size,
+                            arct_ris$trawling_depth))
+```
 
 ```{r}
 #| echo: false
 #| warning: false 
 ## For all species at once 
-ontogeny_summary <- ontogeny_data %>%
-  group_by(species) %>%
-  summarise(vegan::varpart(ontogeny_data$d15N_muscle_untreated,
-                         ~trawling_depth, ~size, data =.)) 
+# ontogeny_summary <- ontogeny_data %>%
+#   group_by(species) %>%
+#   summarise(vegan::varpart(ontogeny_data$d15N_muscle_untreated,
+#                          ~trawling_depth, ~size, data =.)) 
 ```
 
-# Classification
-- classification according to the slope coefficients of the different relationships (set a different value for non-significant relationships?)
-- 1 model (lm) performed /relationship/species
-```{r}
-#| echo: true
-#| warning: false
-#| fig-height: 4
-#| fig-width: 9
+# Summary table
 
-slope_data <- utils::read.csv(here::here("data", "slope_coefficients.csv"),
-                              sep = ";", h=T, row.names=1, dec =",", check.names = F)
+**Testing significance:**
 
-slope_veg <- vegan::vegdist(slope_data, method = "jaccard", binary=FALSE)
-ggdendro::ggdendrogram(hclust(slope_veg, "ward.D2"), rotate = FALSE)
-```
-- group 1 : species with negative relationship __size-depth__
-- group 2 : species with positive relationship __$\delta$<sup>15</sup>N-size__ & __size-depth__
-- group 3 : species with no significant relationship (except _A.olfersii_ __$\delta$<sup>15</sup>N-depth__)
-- group 4 : species with 1 significant relationship ( _S.beanii_ __$\delta$<sup>15</sup>N-depth__ & _N.kroyeri_ __size-depth__) 
+-   $\delta$<sup>15</sup>N - Size & $\delta$<sup>15</sup>N - depth : use of the anova.cca() function to test the significance of each part separately (depth & size) on the variability of $\delta$<sup>15</sup>N values
+-   Depth - size : test with linear model lm (size\~depth)
+-   *Stomias boa* & *Aphanopus carbo* \* depth range too small (\< 100m) so no use of variance partition models on these species, but linear models $\delta$<sup>15</sup>N - size significant
 
-# Figures et graphiques à inclure dans le papier dans l'ordre : 
+![Summary table](summary_table.jpg){width="70%"}
 
-- carte d'échantillonnage 
+# Limits
 
-- Tableau résumé de l'échantillonnage (familles, espèces, N, type de migration, range de taille et de profondeur, taille max fishbase et moyenne des valeurs de $\delta$<sup>15</sup>N avec SD)
+## Test of temporal variability on $\delta$<sup>15</sup>N values
 
-- plot relations $\delta$<sup>15</sup>N-taille /sp (significatives + non significatives)
+-   Difficult to test because it is necessary to eliminate the biases due to size and depth.
+-   However, over 90% of the sampling has been completed between 2019 and 2021 (and almost 3/4 in 2021)
+-   If major environmental changes had occurred that significantly altered the baseline over time, this would have been observed in all species in the same way, which does not appear to be the case here
+-  Test with *Lampnyctus crocodilus*: In the bathypelagic layer and individuals between 10 and 12cm : non signifiant differences 
 
-- plot relation $\delta$<sup>15</sup>N-taille significatives sur le même plot 
-
-- density plot/histogramme de la taille en fonction de la profondeur /sp: mieux d'ulitser que les données des individus prélevés (et pas la série complète) pour éviter les confusions ? 
-
-- Modèles /sp : SEM vs Varpart ? autre à tester ? (intéressant de prendre en compte le lien entre la distribution en taille des individus et la profondeur)
-
-- Tableau récapitulatif des résultats de significativité des modèles ? 
-
-- Cluster : quelles données d'entrée ? coefficient des modèles lm ou SEM ou Varpart ? 
-
-# Supplementary material
-## Distribution en taille des espèces (individus échantillonnés)
 ```{r}
 #| echo: false
 #| warning: false 
-#| fig-height: 9
-#| fig-width: 14
+#| fig-height: 18
+#| fig-width: 25
 
-ggplot(ontogeny_data, aes(x=size)) +
-  geom_density(alpha=0.2, linewidth=0.7, col= "darkblue", fill= "darkblue")+
+ontogeny_data$years <- as.character(ontogeny_data$years)
+
+ggplot(ontogeny_data , aes(x=size, y=d15N_muscle_untreated))+
+  geom_point (alpha=0.7, aes(col=years), size=4) + 
+  paletteer::scale_color_paletteer_d("ggsci::default_ucscgb")+
+  facet_wrap(~species, scale="free_x")+ 
+  xlab("Standard Length (cm)")+
+  ylab(expression({delta}^15*N~'\u2030'))+
+  theme_minimal()+
+  theme(strip.text.x = element_text(size=22,face="italic"),
+        axis.title = element_text(size=22),
+        axis.text =  element_text(size=22),
+        legend.title = element_text(size=22),
+        legend.text = element_text(size=22))
+
+```
+
+## Representativeness of the sampling of individuals for $\delta$<sup>15</sup>N values
+
+-  In supplementary material ?
+
+```{r}
+#| echo: false
+#| warning: false 
+#| fig-height: 10
+#| fig-width: 20
+
+ggplot(size_distribution_complete, aes(x=size)) +
+  geom_density(alpha=0.3, linewidth=0.7, aes(col=dataset, fill= dataset))+
+  scale_color_manual(values = c("#6FB668", "#A070FF"), labels = c("Individuals sampled isotopy", "Total"))+
+  scale_fill_manual(values = c("#6FB668", "#A070FF"), labels = c("Individuals sampled isotopy", "Total"))+
   facet_wrap(~species, scale="free")+
   theme_minimal()+
   theme(strip.text.x = element_text(size=16,face="italic"),
@@ -760,55 +774,10 @@ ggplot(ontogeny_data, aes(x=size)) +
         axis.title = element_text(size=19),
         axis.text =  element_text(size=14, color= "grey50"),
         panel.background=element_rect(color="white"),
-        legend.title = element_text(size=14),
-        legend.text = element_text(size=14))+
- # geom_vline(data = df2, mapping = aes(xintercept = Mean.SL)) +
-  guides(fill="none",col="none")+
-  xlab("Standard Length (cm)")
+        legend.title = element_text(size=19),
+        legend.text = element_text(size=19))+
+  xlab("Standard length (cm)")+
+  guides(fill=guide_legend(title="Dataset"), col=guide_legend(title="Dataset"))
 ```
 
-## Echantillonnage en fonction des années 
-- Plus de 90% de l'échantillonnage a été effectué entre 2019 et 2021 (et presque les 3/4 en 2021)
-```{r}
-#| echo: false
-#| warning: false 
-#| fig-height: 11
-#| fig-width: 21
 
-ontogeny_data$years <- as.character(ontogeny_data$years)
-ggplot(ontogeny_data, aes(x=years, y=d15N_muscle_untreated, col=trawling_depth,
-                     group=years))+
-  geom_point (alpha=0.5, size=2.5) +
-  geom_boxplot(fill="grey", col="grey", alpha=0.2)+
-  facet_wrap(~species, scale="free")+ 
-  xlab("Years")+
-  scale_color_gradient(low = "blue", high = "darkorange")+
-  ylab(expression({delta}^15*N~'\u2030'))+
-  guides(fill="none")+
-  theme_minimal()+
-  theme(strip.text.x = element_text(size=18,face="italic"),
-        axis.title = element_text(size=18),
-        axis.text =  element_text(size=18),
-        legend.title = element_text(size=18),
-        legend.text = element_text(size=18))+
-  labs(col="Depth (m)")
-```
-# Plan intro
-
-__1. Importance of deep-pelagic fish in food webs__
-
-- different roles : consummation of zooplankton, source of prey for top predators and benthic/demersal speices  
-
-- Therefore, better understand their trophic ecology is essential to quantified their role in the functioning of the ecosystem and the services ecosystem they provide... 
-
-__2. Use of stable isotope to characterized their trophic ecology__ 
-
-- Description of the use of $\delta$<sup>15</sup>N values in trophic ecology
-
-__3.	However, trophic ecology of deep-pelagic fish is challenging to study__ 
-
-- Variations in $\delta$<sup>15</sup>N values due to the environment: microbial degradation ...
-
-- In addition, meso- and bathypelagic fish exhibit large variety of feeding patterns adding a level of complexity : migratory behavior, ontogenetic changes in diet, ontogenetic shift in vertical distribution, link with the bottom
-
-__4. Therefore, use of (path) models ...__ 
