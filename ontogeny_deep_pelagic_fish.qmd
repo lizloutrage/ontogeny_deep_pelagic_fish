@@ -2,10 +2,11 @@
 title: "Ontogeny of deep pelagic fish"
 format: 
   html:
-    self-contained: true
+    self-contained: false
     code-fold: true
-editor: visual
+editor: source
 theme: minty
+keep-md: true
 execute:
   warning: false
   message : false
@@ -25,6 +26,7 @@ page-layout: full
 #| echo: false
 #| fig-height: 7
 #| fig-width: 7
+
 library(tidyr)
 library(ggplot2)
 
@@ -32,43 +34,19 @@ library(ggplot2)
 
 size_distribution_complete <- utils::read.csv(here::here("data", "size_distribution_complete.csv"), sep = ";", header = T,dec = ".")
 
-size_distribution_complete$depth_layer <- factor(size_distribution_complete$depth_layer, 
+large_dataset <- subset(size_distribution_complete, dataset == "Total")
+
+large_dataset$depth_layer <- factor(large_dataset$depth_layer, 
                                   levels = c("epipelagic","upper_mesopelagic",
                                          "lower_mesopelagic","bathypelagic"),
                                   labels = c("Epipelagic","Upper mesopelagic",
                                           "Lower mesopelagic","Bathypelagic"))
 
-size_distribution_complete$species <- factor(size_distribution_complete$species,
-                                                   levels = c("Notoscopelus kroyeri",
-                                                              "Myctophum punctatum",
-                                                              "Melanostigma atlanticum",
-                                                               "Lampanyctus crocodilus",
-                                                              "Arctozenus risso",
-                                                              "Xenodermichthys copei",
-                                                              "Serrivomer beanii",
-                                                              "Argyropelecus olfersii",
-                                                              "Stomias boa",
-                                                              "Searsia koefoedi",
-                                                              "Aphanopus carbo",
-                                                              "Lampanyctus macdonaldi"),
-                                              labels = c("N.kroyeri",
-                                                              "M.punctatum",
-                                                              "M.atlanticum",
-                                                               "L.crocodilus",
-                                                              "A.risso",
-                                                              "X.copei",
-                                                              "S.beanii",
-                                                              "A.olfersii",
-                                                              "S.boa",
-                                                              "S.koefoedi",
-                                                              "A.carbo",
-                                                              "L.macdonaldi"))
-
-df3 <- size_distribution_complete %>%
+df3 <- large_dataset%>%
   dplyr::group_by(depth_layer) %>%
   dplyr::summarise(median_sl = median(size))
 
-ggplot(size_distribution_complete, aes(x=size)) +
+ggplot(large_dataset, aes(x=size)) +
   geom_density(alpha=0.3, linewidth=1, aes(col=depth_layer, fill= depth_layer))+
   #geom_histogram(aes(y=..density.., col=depth_layer, fill= depth_layer), alpha=0.3, 
   #               position="identity", binwidth = 1)+
@@ -91,73 +69,120 @@ ggplot(size_distribution_complete, aes(x=size)) +
 
 ```
 
+```{r}
+#| echo: false
+kruskal.test(size ~ depth_layer, data = large_dataset)
+pairwise.wilcox.test(large_dataset$size, large_dataset$depth_layer,
+                     p.adjust.method = "BH")
+```
+
 ## Density plot by depth layer - species level
 
 ```{r}
 #| echo: false
-#| fig-height: 10
+#| fig-height: 15
 #| fig-width: 15
 
-size_distribution_complete <- utils::read.csv(here::here("data", "size_distribution_complete.csv"), sep = ";", header = T,dec = ".")
+large_dataset_significant <- subset(large_dataset, 
+                                   species=="Lampanyctus crocodilus"|
+                                   species=="Melanostigma atlanticum"|
+                                   species=="Xenodermichthys copei" |
+                                   species=="Myctophum punctatum")
 
-size_distribution_complete$depth_layer <- factor(size_distribution_complete$depth_layer, 
-                                                 levels = c("epipelagic","upper_mesopelagic",
-                                                            "lower_mesopelagic","bathypelagic"),
-                                                 labels = c("Epipelagic","Upper mesopelagic",
-                                                            "Lower mesopelagic","Bathypelagic"))
+large_dataset_significant$species <- factor(large_dataset_significant$species,
+                                    levels = c("Lampanyctus crocodilus",
+                                             "Melanostigma atlanticum",
+                                             "Xenodermichthys copei",
+                                             "Myctophum punctatum"))
+    
 
-distribution_subset <- subset(size_distribution_complete, species=="Lampanyctus crocodilus"|
-                                species=="Melanostigma atlanticum"|
-                                species=="Xenodermichthys copei"|
-                                species=="Myctophum punctatum"|
-                                species=="Notoscopelus kroyeri")
-
-distribution_subset$species <- factor(distribution_subset$species,
-                                      levels = c("Melanostigma atlanticum",
-                                                 "Lampanyctus crocodilus",
-                                                 "Xenodermichthys copei",
-                                                 "Myctophum punctatum",
-                                                 "Notoscopelus kroyeri"))
-
-density_plot <- ggplot(distribution_subset, aes(x=size)) +
+density_plot <- ggplot(large_dataset_significant, aes(x=size)) +
   geom_density(alpha=0.3, linewidth=0.8, adjust= 2, fill= "darkblue", col="darkblue")+
   geom_histogram(aes(y=..density.., ), alpha=0.2, 
                  position="identity", binwidth = 1, col="darkblue", fill="darkblue")+
   facet_grid(depth_layer~species, scale="free")+
   theme_minimal()+
-  theme(strip.text.x = element_text(size=13,face="italic"),
-        strip.text.y = element_text(size=8),
-        axis.title = element_text(size=13),
+  theme(strip.text.x = element_text(size=18,face="italic"),
+        strip.text.y = element_text(size=16),
+        axis.title = element_text(size=16),
         axis.text =  element_text(size=13, color= "grey50"),
         panel.background=element_rect(color="white"),
-        legend.title = element_text(size=13),
-        legend.text = element_text(size=13))+
+        legend.title = element_text(size=14),
+        legend.text = element_text(size=14))+
   guides(fill="none",col="none")+
   xlab("Standard Length (cm)")
 
-linear_models <- ggplot(distribution_subset, aes(x=trawling_depth, y=size))+
-  geom_point (alpha=0.4, size=1.5) + 
-  geom_smooth(method=lm, se=T, alpha=0.2, size= 1, col="darkblue") +
+lm_significant <- ggplot(large_dataset_significant, aes(x=trawling_depth, y=size))+
+  geom_point (alpha=0.4, size=1.5, col= "darkblue") + 
+  geom_smooth(method=lm, se=T, alpha=0.2, size= 1, col="darkgrey") +
   facet_wrap(~species, scale = "free", ncol=5)+ 
   ggpmisc::stat_poly_eq(formula = y ~ x, 
                         aes(label = paste(..eq.label.., ..rr.label.., ..p.value.label.. 
                                           , ..n.label..,sep = "*`,`~")),
                         parse = TRUE,
-                        size= 2.5,
+                        size= 3.4,
                         label.x.npc = "right",
                         label.y.npc = "bottom",
                         vstep = -0.0005)+
   scale_y_continuous(trans = 'log2') +
   ylab(bquote(log[2]~"standard length (cm)"))+
-  xlab("Trawling depth (m)")+
+  xlab("")+
   guides(color="none", fill="none")+
   theme_minimal()+
   theme(strip.text.x = element_blank(),
-        axis.title = element_text(size=13),
-        axis.text =  element_text(size=13, color= "grey50"))
+        axis.title = element_text(size=14),
+        axis.text =  element_text(size=12, color= "grey50"))
 
-ggpubr::ggarrange(density_plot, linear_models, ncol = 1, nrow = 2)
+size_depth_sp <- ggpubr::ggarrange(density_plot,lm_significant, labels = c("A","B"),
+                  nrow = 2, heights =  c(2, 1)) 
 
+ggpubr::annotate_figure(size_depth_sp, bottom = ggpubr::text_grob("Depth (m)", size = 15))
+```
+
+### Wilcoxon test at species level:
+
+***Lampanyctus crocodilus*** :
+
+```{r}
+#| echo: false 
+Lamp_cro <- subset(size_distribution_complete, species == "Lampanyctus crocodilus")
+
+kruskal.test(size ~ depth_layer, data = Lamp_cro)
+pairwise.wilcox.test(Lamp_cro$size, Lamp_cro$depth_layer,
+                     p.adjust.method = "BH")
+```
+
+***Melanostigma atlanticum***:
+
+```{r}
+#| echo: false
+mela_atl <- subset(size_distribution_complete, species == "Melanostigma atlanticum")
+
+kruskal.test(size ~ depth_layer, data = mela_atl)
+pairwise.wilcox.test(mela_atl$size, mela_atl$depth_layer,
+                     p.adjust.method = "BH")
+```
+
+***Xenodermichthys copei***:
+
+```{r}
+#| echo: false
+xeno_cop <- subset(size_distribution_complete, species == "Xenodermichthys copei")
+
+kruskal.test(size ~ depth_layer, data = xeno_cop)
+pairwise.wilcox.test(xeno_cop$size, xeno_cop$depth_layer,
+                     p.adjust.method = "BH")
+```
+
+***Myctophum punctatum***:
+
+```{r}
+#| echo: false
+mycto_punc <- subset(size_distribution_complete, species == "Myctophum punctatum")
+
+kruskal.test(size ~ depth_layer, data = mycto_punc)
+pairwise.wilcox.test(mycto_punc$size, mycto_punc$depth_layer,
+                     p.adjust.method = "BH")
 ```
 
 # 2. $\delta$<sup>15</sup>N-size relationships
@@ -217,7 +242,7 @@ ggplot(ontogeny_data , aes(x=size, y=d15N_muscle_untreated))+
   scale_x_continuous(trans = 'log2') +
   xlab(bquote(log[2]~"standard length (cm)"))+
   ylab(expression({delta}^15*N~'\u2030'))+
-  ylim(c(7,13))+
+  ylim(c(7, 14))+
   guides(fill="none")+
   theme_minimal()+
   theme(strip.text.x = element_text(size=10,face="italic"),
@@ -232,7 +257,7 @@ ggplot(ontogeny_data , aes(x=size, y=d15N_muscle_untreated))+
 ```{r}
 #| echo: false
 #| warning: false
-#| fig-height: 10
+#| fig-height: 15
 #| fig-width: 10
 
 library(ggplot2)
@@ -254,34 +279,6 @@ ontogeny_significant$species <- factor(ontogeny_significant$species,
                                           "Aphanopus carbo",
                                           "Arctozenus risso"))
 
-ggplot(ontogeny_significant , aes(x=size, y=d15N_muscle_untreated))+
-  geom_point (alpha=0.4, col="black") + 
-  geom_smooth(method=lm, se=T, alpha=0.2, col= alpha("darkblue",0.7)) +
-  facet_wrap(~species, scale="free_x", ncol=3)+ 
-  ggpmisc::stat_poly_eq(formula = y ~ x, 
-                        aes(label = paste(..eq.label.., ..rr.label.., ..p.value.label.. 
-                                          , ..n.label..,sep = "*`,`~")),
-                        parse = TRUE,
-                        size=3,
-                        label.x.npc = "right",
-                        label.y.npc = "bottom",
-                        vstep = -0.0005)+ 
-  xlab("Standard Length (cm)")+
-  ylab(expression({delta}^15*N~'\u2030'))+
-  ylim(c(7,13))+
-  guides(color="none", fill="none")+
-  theme_minimal()+
-  theme(strip.text.x = element_text(size=10,face="italic"),
-        axis.title = element_text(size=10),
-        axis.text =  element_text(size=10))
-
-```
-
-```{r}
-#| echo: false
-#| warning: false
-#| fig-height: 6
-#| fig-width: 10
 ontogeny_non_significant <- subset(ontogeny_data, species=="Argyropelecus olfersii"|
                                  species=="Lampanyctus macdonaldi"|
                                  species=="Searsia koefoedi" |
@@ -289,30 +286,54 @@ ontogeny_non_significant <- subset(ontogeny_data, species=="Argyropelecus olfers
                                  species=="Xenodermichthys copei")
 
 ontogeny_non_significant$species <- factor(ontogeny_non_significant$species,
-                                       levels = c("Argyropelecus olfersii",
-                                                  "Lampanyctus macdonaldi",
+                                       levels = c("Xenodermichthys copei",
                                                   "Searsia koefoedi",
-                                                  "Notoscopelus kroyeri",
-                                                  "Xenodermichthys copei"))
+                                                  "Argyropelecus olfersii",
+                                                  "Lampanyctus macdonaldi",
+                                                  "Notoscopelus kroyeri"))
 
-ggplot(ontogeny_non_significant, aes(x=size, y=d15N_muscle_untreated))+
+plot_significant  <- ggplot(ontogeny_significant , aes(x=size, y=d15N_muscle_untreated))+
   geom_point (alpha=0.4, col="black") + 
+  geom_smooth(method=lm, se=T, alpha=0.2, col= alpha("darkblue",0.7)) +
   facet_wrap(~species, scale="free_x", ncol=3)+ 
+  ggpmisc::stat_poly_eq(formula = y ~ x, 
+                        aes(label = paste(..eq.label.., ..rr.label.., ..p.value.label.. 
+                                          , ..n.label..,sep = "*`,`~")),
+                        parse = TRUE,
+                        size=3.3,
+                        label.x.npc = "right",
+                        label.y.npc = "bottom",
+                        vstep = -0.0005)+ 
+  xlab("")+
+  ylab(expression({delta}^15*N~'\u2030'))+
+  ylim(c(7,13))+
+  guides(color="none", fill="none")+
+  theme_minimal()+
+  theme(strip.text.x = element_text(size=13,face="italic"),
+        axis.title = element_text(size=13),
+        axis.text =  element_text(size=13))
+
+plot_non_significant <- ggplot(ontogeny_non_significant, aes(x=size, y=d15N_muscle_untreated))+
+  geom_point (alpha=0.4, col="black") + 
+  facet_wrap(~species, scale="free_x", ncol=3, nrow = 3)+ 
   ggpmisc::stat_poly_eq(formula = y ~ x, 
                         aes(label = paste( ..n.label..,sep = "*`,`~")),
                         parse = TRUE,
-                        size=3,
+                        size=3.3,
                         label.x.npc = "right",
                         label.y.npc = "bottom",
                         vstep = -0.0005)+ 
   xlab("Standard Length (cm)")+
   ylab(expression({delta}^15*N~'\u2030'))+
-  ylim(c(7,13))+
+  ylim(c(7, 13))+
   guides(color="none", fill="none")+
   theme_minimal()+
-  theme(strip.text.x = element_text(size=10,face="italic"),
-        axis.title = element_text(size=10),
-        axis.text =  element_text(size=10))
+  theme(strip.text.x = element_text(size=13,face="italic"),
+        axis.title = element_text(size=13),
+        axis.text =  element_text(size=13))
+
+ggpubr::ggarrange(plot_significant, plot_non_significant, ncol=1, labels = c("A", "B"),
+                  heights = c(2,1.2))
 
 ```
 
@@ -356,6 +377,26 @@ plot(ontogeny_part,
      bg = c("#072AC8", "#0B5345"), alpha = 100, # colour the circles
      digits = 2, # only show 2 digits
      cex = 1.4)
+
+vegan::anova.cca(vegan::rda(ontogeny_data$d15N_muscle_untreated, ontogeny_data$trawling_depth, ontogeny_data$size))
+```
+
+### Significance testing
+
+#### \[a\] Depth alone
+
+```{r}
+#| echo: false
+#| output: false
+vegan::anova.cca(vegan::rda(ontogeny_data$d15N_muscle_untreated, ontogeny_data$trawling_depth, ontogeny_data$size))
+```
+
+#### \[a\] size alone
+
+```{r}
+#| echo: false
+#| output: false
+vegan::anova.cca(vegan::rda(ontogeny_data$d15N_muscle_untreated, ontogeny_data$size, ontogeny_data$trawling_depth))
 ```
 
 ## *Lampanyctus crocodilus*
@@ -696,13 +737,14 @@ vegan::anova.cca(vegan::rda(arct_ris$d15N_muscle_untreated, arct_ris$size,
 ```
 
 ## Variance partitionning summary
+
 ```{r}
 #| echo: false
 #| fig-height: 7
 #| fig-width: 13
 
 library(dplyr)
-variation_coeffcients <- utils::read.csv(here::here("data", "variation_coeffcients.csv"), sep = ";", header = T,dec = ",")
+variation_coeffcients <- utils::read.csv(here::here("data", "variation_coeffcients.csv"), sep = ";", header = T, dec = ",")
 
 var_coeff_resi <- variation_coeffcients%>%
   filter(variation_coeffcients$relation != "residuals")
@@ -712,30 +754,32 @@ var_coeff_resi$species <- factor(var_coeff_resi$species,
                                                     "Notoscopelus kroyeri",
                                                     "Searsia koefoedi",
                                                     "Lampanyctus macdonaldi",
-                                                    "Xenodermichthys copei",
-                                                    "Arctozenus risso",
-                                                    "Argyropelecus olfersii",
-                                                    "Serrivomer beanii",
                                                     "Melanostigma atlanticum",
+                                                    "Xenodermichthys copei",
+                                                    "Argyropelecus olfersii",
+                                                    "Arctozenus risso",
+                                                    "Serrivomer beanii",
                                                     "Myctophum punctatum",
                                                     "Lampanyctus crocodilus"))
 
 
 # Stacked + percent
 ggplot(var_coeff_resi, aes(fill=relation, y=value, x=species)) + 
-  geom_bar(position="stack", stat="identity", alpha=0.9)+
-  scale_fill_brewer(palette = "Set2",labels=c('Depth', 'Depth and size',"Size"))+
+  geom_bar(position="stack", stat="identity", alpha=0.4, size=0.6, aes(col=relation))+
+  paletteer::scale_fill_paletteer_d("ggthemes::excel_Aspect", labels=c("Depth","Depth and size", "Size"))+
+  paletteer::scale_color_paletteer_d("ggthemes::excel_Aspect")+
   theme_minimal()+
   coord_flip()+
-  theme(axis.text.y = element_text(face ="italic", size=13),
-        axis.title = element_text(size=13),
-        legend.text = element_text(size=12),
-        legend.title = element_text(size=13),
-        axis.text.x = element_text(size=12))+
-  guides(fill=guide_legend(title="Explanatory varibales"))
+  theme(axis.text.y = element_text(face ="italic", size=15),
+        axis.title = element_text(size=15),
+        legend.text = element_text(size=15),
+        legend.title = element_text(size=15),
+        axis.text.x = element_text(size=15))+
+  guides(fill=guide_legend(title="Explanatory variables"),
+         color="none")
+
         
 ```
-
 
 # 5. Summary table
 
@@ -804,8 +848,8 @@ ggplot(ontogeny_data , aes(x=size, y=d15N_muscle_untreated))+
 
 ggplot(size_distribution_complete, aes(x=size)) +
   geom_density(alpha=0.3, linewidth=0.7, aes(col=dataset, fill= dataset))+
-  scale_color_manual(values = c("#6FB668", "#A070FF"), labels = c("Individuals sampled isotopy", "Total"))+
-  scale_fill_manual(values = c("#6FB668", "#A070FF"), labels = c("Individuals sampled isotopy", "Total"))+
+  scale_color_manual(values = c("#6FB668", "#A070FF"), labels = c("Sub-sampled data set (individuals sampled isotopy)", "Initial data set"))+
+  scale_fill_manual(values = c("#6FB668", "#A070FF"), labels = c("Sub-sampled data set (individuals sampled isotopy)", "Initial data set"))+
   facet_wrap(~species, scale="free")+
   theme_minimal()+
   theme(strip.text.x = element_text(size=16,face="italic"),
