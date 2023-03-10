@@ -1,13 +1,26 @@
-essai <- large_dataset%>%
-  group_by(species)%>%
-  do(w = wilcox.test(size ~ depth_layer,  data = large_dataset))
+# relation x= taille et y= abondance par profondeur
+large_dataset <- subset(size_distribution_complete, dataset == "Total")
 
-large_dataset %>%
-  group_by(dose) %>%
-  wilcox_test(data =., len ~ supp) %>%
-  adjust_pvalue(method = "bonferroni") %>%
-  add_significance("p.adj")
+large_dataset$depth_layer <- factor(large_dataset$depth_layer, 
+                                    levels = c("epipelagic","upper_mesopelagic",
+                                               "lower_mesopelagic","bathypelagic"),
+                                    labels = c("Epipelagic","Upper mesopelagic",
+                                               "Lower mesopelagic","Bathypelagic"))
 
-kruskal.test(size ~ depth_layer, data = large_dataset)
-pairwise.wilcox.test(large_dataset$size, large_dataset$depth_layer,
-                     p.adjust.method = "BH")
+abundance_size <- large_dataset %>%
+  count(size, depth_layer)
+
+ggplot(abundance_size, aes(x=size, y=n)) + 
+  geom_smooth(method = "lm", se=F)+
+  geom_point()+
+  ggpmisc::stat_poly_eq(formula = y ~ x, 
+                        aes(label = paste(..eq.label.., ..rr.label.., ..p.value.label.. 
+                                          , ..n.label..,sep = "*`,`~")),
+                        parse = TRUE,
+                        size= 3.4,
+                        label.x.npc = "right",
+                        label.y.npc = "bottom",
+                        vstep = -0.0005)+
+  facet_wrap(~depth_layer, ncol=1, scales = "free_y") +
+  theme_minimal()
+

@@ -20,69 +20,6 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1.6em;
   vertical-align: middle;
 }
-pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
-pre > code.sourceCode > span:empty { height: 1.2em; }
-.sourceCode { overflow: visible; }
-code.sourceCode > span { color: inherit; text-decoration: inherit; }
-div.sourceCode { margin: 1em 0; }
-pre.sourceCode { margin: 0; }
-@media screen {
-div.sourceCode { overflow: auto; }
-}
-@media print {
-pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
-}
-pre.numberSource code
-  { counter-reset: source-line 0; }
-pre.numberSource code > span
-  { position: relative; left: -4em; counter-increment: source-line; }
-pre.numberSource code > span > a:first-child::before
-  { content: counter(source-line);
-    position: relative; left: -1em; text-align: right; vertical-align: baseline;
-    border: none; display: inline-block;
-    -webkit-touch-callout: none; -webkit-user-select: none;
-    -khtml-user-select: none; -moz-user-select: none;
-    -ms-user-select: none; user-select: none;
-    padding: 0 4px; width: 4em;
-    color: #aaaaaa;
-  }
-pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
-div.sourceCode
-  {   }
-@media screen {
-pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
-}
-code span.al { color: #ff0000; font-weight: bold; } /* Alert */
-code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
-code span.at { color: #7d9029; } /* Attribute */
-code span.bn { color: #40a070; } /* BaseN */
-code span.bu { color: #008000; } /* BuiltIn */
-code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
-code span.ch { color: #4070a0; } /* Char */
-code span.cn { color: #880000; } /* Constant */
-code span.co { color: #60a0b0; font-style: italic; } /* Comment */
-code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
-code span.do { color: #ba2121; font-style: italic; } /* Documentation */
-code span.dt { color: #902000; } /* DataType */
-code span.dv { color: #40a070; } /* DecVal */
-code span.er { color: #ff0000; font-weight: bold; } /* Error */
-code span.ex { } /* Extension */
-code span.fl { color: #40a070; } /* Float */
-code span.fu { color: #06287e; } /* Function */
-code span.im { color: #008000; font-weight: bold; } /* Import */
-code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
-code span.kw { color: #007020; font-weight: bold; } /* Keyword */
-code span.op { color: #666666; } /* Operator */
-code span.ot { color: #007020; } /* Other */
-code span.pp { color: #bc7a00; } /* Preprocessor */
-code span.sc { color: #4070a0; } /* SpecialChar */
-code span.ss { color: #bb6688; } /* SpecialString */
-code span.st { color: #4070a0; } /* String */
-code span.va { color: #19177c; } /* Variable */
-code span.vs { color: #4070a0; } /* VerbatimString */
-code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
 </style>
 
 
@@ -96,16 +33,6 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <script src="ontogeny_deep_pelagic_fish_files/libs/bootstrap/bootstrap.min.js"></script>
 <link href="ontogeny_deep_pelagic_fish_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
 <link href="ontogeny_deep_pelagic_fish_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
-
-<script src="ontogeny_deep_pelagic_fish_files/libs/htmlwidgets-1.6.1/htmlwidgets.js"></script>
-<link href="ontogeny_deep_pelagic_fish_files/libs/datatables-css-0.0.0/datatables-crosstalk.css" rel="stylesheet">
-<script src="ontogeny_deep_pelagic_fish_files/libs/datatables-binding-0.27/datatables.js"></script>
-<script src="ontogeny_deep_pelagic_fish_files/libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
-<link href="ontogeny_deep_pelagic_fish_files/libs/dt-core-1.12.1/css/jquery.dataTables.min.css" rel="stylesheet">
-<link href="ontogeny_deep_pelagic_fish_files/libs/dt-core-1.12.1/css/jquery.dataTables.extra.css" rel="stylesheet">
-<script src="ontogeny_deep_pelagic_fish_files/libs/dt-core-1.12.1/js/jquery.dataTables.min.js"></script>
-<link href="ontogeny_deep_pelagic_fish_files/libs/crosstalk-1.2.0/css/crosstalk.min.css" rel="stylesheet">
-<script src="ontogeny_deep_pelagic_fish_files/libs/crosstalk-1.2.0/js/crosstalk.min.js"></script>
 
   <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
 
@@ -121,28 +48,22 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
   <ul>
   <li><a href="#size-distribution-as-a-function-of-depth" id="toc-size-distribution-as-a-function-of-depth" class="nav-link active" data-scroll-target="#size-distribution-as-a-function-of-depth">1. Size distribution as a function of depth</a>
   <ul class="collapse">
-  <li><a href="#density-plot-by-depth-layer---community-level" id="toc-density-plot-by-depth-layer---community-level" class="nav-link" data-scroll-target="#density-plot-by-depth-layer---community-level">Density plot by depth layer - community level</a></li>
-  <li><a href="#density-plot-by-depth-layer---species-level" id="toc-density-plot-by-depth-layer---species-level" class="nav-link" data-scroll-target="#density-plot-by-depth-layer---species-level">Density plot by depth layer - species level</a>
+  <li><a href="#density-plot-by-depth-layer---community-level" id="toc-density-plot-by-depth-layer---community-level" class="nav-link" data-scroll-target="#density-plot-by-depth-layer---community-level">Density plot by depth layer - community level</a>
   <ul class="collapse">
-  <li><a href="#wilcoxon-test-at-species-level" id="toc-wilcoxon-test-at-species-level" class="nav-link" data-scroll-target="#wilcoxon-test-at-species-level">Wilcoxon test at species level:</a></li>
+  <li><a href="#test-of-the-significance-of-the-size-depth-relationship---community-level" id="toc-test-of-the-significance-of-the-size-depth-relationship---community-level" class="nav-link" data-scroll-target="#test-of-the-significance-of-the-size-depth-relationship---community-level">Test of the significance of the size-depth relationship - community level</a></li>
   </ul></li>
+  <li><a href="#density-plot-by-depth-layer---species-level" id="toc-density-plot-by-depth-layer---species-level" class="nav-link" data-scroll-target="#density-plot-by-depth-layer---species-level">Density plot by depth layer - species level</a></li>
   </ul></li>
+  <li><a href="#linear-relationships" id="toc-linear-relationships" class="nav-link" data-scroll-target="#linear-relationships">Linear relationships</a></li>
   <li><a href="#delta15n-size-relationships" id="toc-delta15n-size-relationships" class="nav-link" data-scroll-target="#delta15n-size-relationships">2. <span class="math inline">\(\delta\)</span><sup>15</sup>N-size relationships</a>
   <ul class="collapse">
   <li><a href="#at-community-level" id="toc-at-community-level" class="nav-link" data-scroll-target="#at-community-level">At community level</a></li>
   <li><a href="#at-species-level" id="toc-at-species-level" class="nav-link" data-scroll-target="#at-species-level">At species level</a></li>
-  <li><a href="#variation-coefficients" id="toc-variation-coefficients" class="nav-link" data-scroll-target="#variation-coefficients">Variation coefficients</a></li>
   </ul></li>
   <li><a href="#variation-partitionning" id="toc-variation-partitionning" class="nav-link" data-scroll-target="#variation-partitionning">4. Variation partitionning</a>
   <ul class="collapse">
-  <li><a href="#at-community-level-1" id="toc-at-community-level-1" class="nav-link" data-scroll-target="#at-community-level-1">At community level</a>
-  <ul class="collapse">
-  <li><a href="#significance-testing" id="toc-significance-testing" class="nav-link" data-scroll-target="#significance-testing">Significance testing</a></li>
-  </ul></li>
-  <li><a href="#lampanyctus-crocodilus" id="toc-lampanyctus-crocodilus" class="nav-link" data-scroll-target="#lampanyctus-crocodilus"><em>Lampanyctus crocodilus</em></a>
-  <ul class="collapse">
-  <li><a href="#significance-testing-1" id="toc-significance-testing-1" class="nav-link" data-scroll-target="#significance-testing-1">Significance testing</a></li>
-  </ul></li>
+  <li><a href="#at-community-level-1" id="toc-at-community-level-1" class="nav-link" data-scroll-target="#at-community-level-1">At community level</a></li>
+  <li><a href="#lampanyctus-crocodilus" id="toc-lampanyctus-crocodilus" class="nav-link" data-scroll-target="#lampanyctus-crocodilus"><em>Lampanyctus crocodilus</em></a></li>
   <li><a href="#myctophum-punctatum" id="toc-myctophum-punctatum" class="nav-link" data-scroll-target="#myctophum-punctatum"><em>Myctophum punctatum</em></a></li>
   <li><a href="#melanostigma-atlanticum" id="toc-melanostigma-atlanticum" class="nav-link" data-scroll-target="#melanostigma-atlanticum"><em>Melanostigma atlanticum</em></a></li>
   <li><a href="#serrivomer-beanii" id="toc-serrivomer-beanii" class="nav-link" data-scroll-target="#serrivomer-beanii"><em>Serrivomer beanii</em></a></li>
@@ -159,6 +80,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
   <ul class="collapse">
   <li><a href="#test-of-temporal-variability-on-delta15n-values" id="toc-test-of-temporal-variability-on-delta15n-values" class="nav-link" data-scroll-target="#test-of-temporal-variability-on-delta15n-values">Test of temporal variability on <span class="math inline">\(\delta\)</span><sup>15</sup>N values</a></li>
   <li><a href="#representativeness-of-the-sampling-of-individuals-for-delta15n-values" id="toc-representativeness-of-the-sampling-of-individuals-for-delta15n-values" class="nav-link" data-scroll-target="#representativeness-of-the-sampling-of-individuals-for-delta15n-values">Representativeness of the sampling of individuals for <span class="math inline">\(\delta\)</span><sup>15</sup>N values</a></li>
+  <li><a href="#non-significant-size-depth-relationships-at-species-level" id="toc-non-significant-size-depth-relationships-at-species-level" class="nav-link" data-scroll-target="#non-significant-size-depth-relationships-at-species-level">Non-significant size-depth relationships at species level</a></li>
   </ul></li>
   </ul>
 </nav>
@@ -193,132 +115,37 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </ul>
 <div class="cell">
 <div class="cell-output-display">
-<p><img src="ontogeny_deep_pelagic_fish_files/figure-html/unnamed-chunk-1-1.png" class="img-fluid" width="672"></p>
+<p><img src="ontogeny_deep_pelagic_fish_files/figure-html/size_depth_community-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
+<section id="test-of-the-significance-of-the-size-depth-relationship---community-level" class="level3">
+<h3 class="anchored" data-anchor-id="test-of-the-significance-of-the-size-depth-relationship---community-level">Test of the significance of the size-depth relationship - community level</h3>
 <div class="cell">
-<div class="cell-output cell-output-stdout">
-<pre><code>
-    Kruskal-Wallis rank sum test
-
-data:  size by depth_layer
-Kruskal-Wallis chi-squared = 136.67, df = 3, p-value &lt; 2.2e-16</code></pre>
-</div>
-<div class="cell-output cell-output-stdout">
-<pre><code>
-    Pairwise comparisons using Wilcoxon rank sum test with continuity correction 
-
-data:  large_dataset$size and large_dataset$depth_layer 
-
-                  Epipelagic Upper mesopelagic Lower mesopelagic
-Upper mesopelagic 1.9e-12    -                 -                
-Lower mesopelagic 7.1e-13    &lt; 2e-16           -                
-Bathypelagic      1.1e-14    7.1e-13           0.36             
-
-P value adjustment method: BH </code></pre>
+<div class="cell-output-display">
+<p><img src="ontogeny_deep_pelagic_fish_files/figure-html/size_depth_community_lm-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
+</section>
 </section>
 <section id="density-plot-by-depth-layer---species-level" class="level2">
 <h2 class="anchored" data-anchor-id="density-plot-by-depth-layer---species-level">Density plot by depth layer - species level</h2>
+<ul>
+<li>Only significant relationships (non-significant relationships in supplementary materials)</li>
+</ul>
 <div class="cell">
 <div class="cell-output-display">
-<p><img src="ontogeny_deep_pelagic_fish_files/figure-html/unnamed-chunk-3-1.png" class="img-fluid" width="1440"></p>
-</div>
-</div>
-<section id="wilcoxon-test-at-species-level" class="level3">
-<h3 class="anchored" data-anchor-id="wilcoxon-test-at-species-level">Wilcoxon test at species level:</h3>
-<p><strong><em>Lampanyctus crocodilus</em></strong> :</p>
-<div class="cell">
-<div class="cell-output cell-output-stdout">
-<pre><code>
-    Kruskal-Wallis rank sum test
-
-data:  size by depth_layer
-Kruskal-Wallis chi-squared = 281.78, df = 2, p-value &lt; 2.2e-16</code></pre>
-</div>
-<div class="cell-output cell-output-stdout">
-<pre><code>
-    Pairwise comparisons using Wilcoxon rank sum test with continuity correction 
-
-data:  Lamp_cro$size and Lamp_cro$depth_layer 
-
-                  bathypelagic lower_mesopelagic
-lower_mesopelagic 0.48         -                
-upper_mesopelagic &lt;2e-16       &lt;2e-16           
-
-P value adjustment method: BH </code></pre>
-</div>
-</div>
-<p><strong><em>Melanostigma atlanticum</em></strong>:</p>
-<div class="cell">
-<div class="cell-output cell-output-stdout">
-<pre><code>
-    Kruskal-Wallis rank sum test
-
-data:  size by depth_layer
-Kruskal-Wallis chi-squared = 36.266, df = 2, p-value = 1.333e-08</code></pre>
-</div>
-<div class="cell-output cell-output-stdout">
-<pre><code>
-    Pairwise comparisons using Wilcoxon rank sum test with continuity correction 
-
-data:  mela_atl$size and mela_atl$depth_layer 
-
-                  bathypelagic lower_mesopelagic
-lower_mesopelagic 3e-08        -                
-upper_mesopelagic 0.035        0.282            
-
-P value adjustment method: BH </code></pre>
-</div>
-</div>
-<p><strong><em>Xenodermichthys copei</em></strong>:</p>
-<div class="cell">
-<div class="cell-output cell-output-stdout">
-<pre><code>
-    Kruskal-Wallis rank sum test
-
-data:  size by depth_layer
-Kruskal-Wallis chi-squared = 9.3788, df = 2, p-value = 0.009192</code></pre>
-</div>
-<div class="cell-output cell-output-stdout">
-<pre><code>
-    Pairwise comparisons using Wilcoxon rank sum test with continuity correction 
-
-data:  xeno_cop$size and xeno_cop$depth_layer 
-
-                  bathypelagic lower_mesopelagic
-lower_mesopelagic 0.2584       -                
-upper_mesopelagic 0.2584       0.0085           
-
-P value adjustment method: BH </code></pre>
-</div>
-</div>
-<p><strong><em>Myctophum punctatum</em></strong>:</p>
-<div class="cell">
-<div class="cell-output cell-output-stdout">
-<pre><code>
-    Kruskal-Wallis rank sum test
-
-data:  size by depth_layer
-Kruskal-Wallis chi-squared = 16.032, df = 3, p-value = 0.001117</code></pre>
-</div>
-<div class="cell-output cell-output-stdout">
-<pre><code>
-    Pairwise comparisons using Wilcoxon rank sum test with continuity correction 
-
-data:  mycto_punc$size and mycto_punc$depth_layer 
-
-                  bathypelagic epipelagic lower_mesopelagic
-epipelagic        0.5892       -          -                
-lower_mesopelagic 0.4431       0.7591     -                
-upper_mesopelagic 0.0038       0.0038     0.0017           
-
-P value adjustment method: BH </code></pre>
+<p><img src="ontogeny_deep_pelagic_fish_files/figure-html/size_depth_species-1.png" class="img-fluid" width="1248"></p>
 </div>
 </div>
 </section>
 </section>
+<section id="linear-relationships" class="level1">
+<h1>Linear relationships</h1>
+<div class="cell">
+<div class="cell-output-display">
+<p><img src="ontogeny_deep_pelagic_fish_files/figure-html/size_depth_species_lm-1.png" class="img-fluid" width="960"></p>
+</div>
+</div>
 </section>
 <section id="delta15n-size-relationships" class="level1">
 <h1>2. <span class="math inline">\(\delta\)</span><sup>15</sup>N-size relationships</h1>
@@ -334,7 +161,7 @@ P value adjustment method: BH </code></pre>
 </ul>
 <div class="cell">
 <div class="cell-output-display">
-<p><img src="ontogeny_deep_pelagic_fish_files/figure-html/unnamed-chunk-8-1.png" class="img-fluid" width="672"></p>
+<p><img src="ontogeny_deep_pelagic_fish_files/figure-html/d15n_size_community-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
 </section>
@@ -342,35 +169,14 @@ P value adjustment method: BH </code></pre>
 <h2 class="anchored" data-anchor-id="at-species-level">At species level</h2>
 <ul>
 <li><span class="math inline">\(\delta\)</span><sup>15</sup>N axis standardized</li>
+<li><strong>A</strong>: significant relationships</li>
+<li><strong>B</strong>: non-significant relationships</li>
+<li><strong>Coefficient of variation</strong>: The dispersion of the <span class="math inline">\(\delta\)</span><sup>15</sup>N values is not the same between the species having shown non-significant <span class="math inline">\(\delta\)</span><sup>15</sup>N-size relationships: <em>X. copei</em> presents a strong dispersion of its values (CV = 6.57) contrary to the values of <em>N. kroyeri</em> which remain relatively stable with the size of its individuals (CV = 2.15)</li>
+<li>Do these differences translate into differences in their feeding strategies?</li>
 </ul>
 <div class="cell">
 <div class="cell-output-display">
-<p><img src="ontogeny_deep_pelagic_fish_files/figure-html/unnamed-chunk-9-1.png" class="img-fluid" width="960"></p>
-</div>
-</div>
-</section>
-<section id="variation-coefficients" class="level2">
-<h2 class="anchored" data-anchor-id="variation-coefficients">Variation coefficients</h2>
-<ul>
-<li><p>The dispersion of the <span class="math inline">\(\delta\)</span><sup>15</sup>N values is not the same between the species having shown non-significant <span class="math inline">\(\delta\)</span><sup>15</sup>N-size relationships: <em>X. copei</em> presents a strong dispersion of its values (CV = 6.57) contrary to the values of <em>N. kroyeri</em> which remain relatively stable with the size of its individuals (CV = 2.15)</p></li>
-<li><p>Do these differences translate into differences in their feeding strategies?</p></li>
-</ul>
-<div class="cell">
-<details>
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>cv <span class="ot">&lt;-</span> <span class="cf">function</span>(x){</span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  (<span class="fu">sd</span>(x)<span class="sc">/</span><span class="fu">mean</span>(x))<span class="sc">*</span><span class="dv">100</span></span>
-<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>coeff_var <span class="ot">&lt;-</span> <span class="fu">aggregate</span>(d15N_muscle_untreated <span class="sc">~</span> species, </span>
-<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>                       <span class="at">data =</span> ontogeny_non_significant,</span>
-<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>                       <span class="at">FUN =</span> cv)</span>
-<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>DT<span class="sc">::</span><span class="fu">datatable</span>(coeff_var)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-<div class="cell-output-display">
-
-<div class="datatables html-widget html-fill-item-overflow-hidden html-fill-item" id="htmlwidget-155551b979009b352d4d" style="width:100%;height:auto;"></div>
-<script type="application/json" data-for="htmlwidget-155551b979009b352d4d">{"x":{"filter":"none","vertical":false,"data":[["1","2","3","4","5"],["Xenodermichthys copei","Searsia koefoedi","Argyropelecus olfersii","Lampanyctus macdonaldi","Notoscopelus kroyeri"],[6.57390838338306,4.81349917264628,4.56980842451252,2.67789179492498,2.14882039847784]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>species<\/th>\n      <th>d15N_muscle_untreated<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"className":"dt-right","targets":2},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
+<p><img src="ontogeny_deep_pelagic_fish_files/figure-html/d15_size_species-1.png" class="img-fluid" width="960"></p>
 </div>
 </div>
 </section>
@@ -379,108 +185,42 @@ P value adjustment method: BH </code></pre>
 <h1>4. Variation partitionning</h1>
 <ul>
 <li>At the species level, is it the sampling depth or the size of the individuals that most influences the values in <span class="math inline">\(\delta\)</span><sup>15</sup>N?</li>
+<li>To test the significance of the influence of each variable (depth and size) on ()<span class="math inline">\(^{15}\)</span>N values an ANOVA-type permutation test was performed for each model (anova.cca function)</li>
+<li>Since the third fraction is not the result of an RDA, it cannot be tested for significance.</li>
 </ul>
 <section id="at-community-level-1" class="level2">
 <h2 class="anchored" data-anchor-id="at-community-level-1">At community level</h2>
 <div class="cell">
-<div class="cell-output cell-output-stdout">
-<pre><code>No. of explanatory tables: 2 
-Total variation (SS): 464.43 
-            Variance: 0.68198 
-No. of observations: 682 
-
-Partition table:
-                     Df R.squared Adj.R.squared Testable
-[a+c] = X1            1   0.00908       0.00762     TRUE
-[b+c] = X2            1   0.00388       0.00242     TRUE
-[a+b+c] = X1+X2       2   0.01124       0.00833     TRUE
-Individual fractions                                    
-[a] = X1|X2           1                 0.00591     TRUE
-[b] = X2|X1           1                 0.00070     TRUE
-[c]                   0                 0.00171    FALSE
-[d] = Residuals                         0.99167    FALSE
----
-Use function 'rda' to test significance of fractions of interest</code></pre>
-</div>
 <div class="cell-output-display">
-<p><img src="ontogeny_deep_pelagic_fish_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid" width="576"></p>
-</div>
-<div class="cell-output cell-output-stdout">
-<pre><code>Permutation test for rda under reduced model
-Permutation: free
-Number of permutations: 999
-
-Model: rda(X = ontogeny_data$d15N_muscle_untreated, Y = ontogeny_data$trawling_depth, Z = ontogeny_data$size)
-          Df Variance      F Pr(&gt;F)  
-Model      1  0.00502 5.0547  0.021 *
-Residual 679  0.67432                
----
-Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</code></pre>
+<p><img src="ontogeny_deep_pelagic_fish_files/figure-html/unnamed-chunk-7-1.png" class="img-fluid" width="576"></p>
 </div>
 </div>
-<section id="significance-testing" class="level3">
-<h3 class="anchored" data-anchor-id="significance-testing">Significance testing</h3>
-<section id="a-depth-alone" class="level4">
-<h4 class="anchored" data-anchor-id="a-depth-alone">[a] Depth alone</h4>
 <div class="cell">
 
 </div>
-</section>
-<section id="a-size-alone" class="level4">
-<h4 class="anchored" data-anchor-id="a-size-alone">[a] size alone</h4>
 <div class="cell">
 
 </div>
-</section>
-</section>
 </section>
 <section id="lampanyctus-crocodilus" class="level2">
 <h2 class="anchored" data-anchor-id="lampanyctus-crocodilus"><em>Lampanyctus crocodilus</em></h2>
 <div class="cell">
-<div class="cell-output cell-output-stdout">
-<pre><code>No. of explanatory tables: 2 
-Total variation (SS): 62.194 
-            Variance: 0.44109 
-No. of observations: 142 
-
-Partition table:
-                     Df R.squared Adj.R.squared Testable
-[a+c] = X1            1   0.07704       0.07045     TRUE
-[b+c] = X2            1   0.33675       0.33202     TRUE
-[a+b+c] = X1+X2       2   0.33714       0.32760     TRUE
-Individual fractions                                    
-[a] = X1|X2           1                -0.00442     TRUE
-[b] = X2|X1           1                 0.25715     TRUE
-[c]                   0                 0.07487    FALSE
-[d] = Residuals                         0.67240    FALSE
----
-Use function 'rda' to test significance of fractions of interest</code></pre>
-</div>
 <div class="cell-output-display">
-<p><img src="ontogeny_deep_pelagic_fish_files/figure-html/unnamed-chunk-14-1.png" class="img-fluid" width="576"></p>
+<p><img src="ontogeny_deep_pelagic_fish_files/figure-html/unnamed-chunk-10-1.png" class="img-fluid" width="576"></p>
 </div>
 </div>
-<section id="significance-testing-1" class="level3">
-<h3 class="anchored" data-anchor-id="significance-testing-1">Significance testing</h3>
-<section id="a-depth-alone-1" class="level4">
-<h4 class="anchored" data-anchor-id="a-depth-alone-1">[a] Depth alone</h4>
 <div class="cell">
 
 </div>
-</section>
-<section id="c-size-alone" class="level4">
-<h4 class="anchored" data-anchor-id="c-size-alone">[c] Size alone</h4>
 <div class="cell">
 
 </div>
-</section>
-</section>
 </section>
 <section id="myctophum-punctatum" class="level2">
 <h2 class="anchored" data-anchor-id="myctophum-punctatum"><em>Myctophum punctatum</em></h2>
 <div class="cell">
 <div class="cell-output-display">
-<p><img src="ontogeny_deep_pelagic_fish_files/figure-html/unnamed-chunk-17-1.png" class="img-fluid" width="576"></p>
+<p><img src="ontogeny_deep_pelagic_fish_files/figure-html/unnamed-chunk-13-1.png" class="img-fluid" width="576"></p>
 </div>
 </div>
 <div class="cell">
@@ -494,7 +234,7 @@ Use function 'rda' to test significance of fractions of interest</code></pre>
 <h2 class="anchored" data-anchor-id="melanostigma-atlanticum"><em>Melanostigma atlanticum</em></h2>
 <div class="cell">
 <div class="cell-output-display">
-<p><img src="ontogeny_deep_pelagic_fish_files/figure-html/unnamed-chunk-20-1.png" class="img-fluid" width="576"></p>
+<p><img src="ontogeny_deep_pelagic_fish_files/figure-html/unnamed-chunk-16-1.png" class="img-fluid" width="576"></p>
 </div>
 </div>
 <div class="cell">
@@ -508,7 +248,7 @@ Use function 'rda' to test significance of fractions of interest</code></pre>
 <h2 class="anchored" data-anchor-id="serrivomer-beanii"><em>Serrivomer beanii</em></h2>
 <div class="cell">
 <div class="cell-output-display">
-<p><img src="ontogeny_deep_pelagic_fish_files/figure-html/unnamed-chunk-23-1.png" class="img-fluid" width="576"></p>
+<p><img src="ontogeny_deep_pelagic_fish_files/figure-html/unnamed-chunk-19-1.png" class="img-fluid" width="576"></p>
 </div>
 </div>
 <div class="cell">
@@ -522,7 +262,7 @@ Use function 'rda' to test significance of fractions of interest</code></pre>
 <h2 class="anchored" data-anchor-id="argyropelecus-olfersii"><em>Argyropelecus olfersii</em></h2>
 <div class="cell">
 <div class="cell-output-display">
-<p><img src="ontogeny_deep_pelagic_fish_files/figure-html/unnamed-chunk-26-1.png" class="img-fluid" width="576"></p>
+<p><img src="ontogeny_deep_pelagic_fish_files/figure-html/unnamed-chunk-22-1.png" class="img-fluid" width="576"></p>
 </div>
 </div>
 <div class="cell">
@@ -536,7 +276,7 @@ Use function 'rda' to test significance of fractions of interest</code></pre>
 <h2 class="anchored" data-anchor-id="lampanyctus-macdonaldi"><em>Lampanyctus macdonaldi</em></h2>
 <div class="cell">
 <div class="cell-output-display">
-<p><img src="ontogeny_deep_pelagic_fish_files/figure-html/unnamed-chunk-29-1.png" class="img-fluid" width="576"></p>
+<p><img src="ontogeny_deep_pelagic_fish_files/figure-html/unnamed-chunk-25-1.png" class="img-fluid" width="576"></p>
 </div>
 </div>
 <div class="cell">
@@ -550,7 +290,7 @@ Use function 'rda' to test significance of fractions of interest</code></pre>
 <h2 class="anchored" data-anchor-id="searsia-koefoedi"><em>Searsia koefoedi</em></h2>
 <div class="cell">
 <div class="cell-output-display">
-<p><img src="ontogeny_deep_pelagic_fish_files/figure-html/unnamed-chunk-32-1.png" class="img-fluid" width="576"></p>
+<p><img src="ontogeny_deep_pelagic_fish_files/figure-html/unnamed-chunk-28-1.png" class="img-fluid" width="576"></p>
 </div>
 </div>
 <div class="cell">
@@ -564,7 +304,7 @@ Use function 'rda' to test significance of fractions of interest</code></pre>
 <h2 class="anchored" data-anchor-id="notoscopelus-kroyeri"><em>Notoscopelus kroyeri</em></h2>
 <div class="cell">
 <div class="cell-output-display">
-<p><img src="ontogeny_deep_pelagic_fish_files/figure-html/unnamed-chunk-35-1.png" class="img-fluid" width="576"></p>
+<p><img src="ontogeny_deep_pelagic_fish_files/figure-html/unnamed-chunk-31-1.png" class="img-fluid" width="576"></p>
 </div>
 </div>
 <div class="cell">
@@ -578,7 +318,7 @@ Use function 'rda' to test significance of fractions of interest</code></pre>
 <h2 class="anchored" data-anchor-id="xenodermichthys-copei"><em>Xenodermichthys copei</em></h2>
 <div class="cell">
 <div class="cell-output-display">
-<p><img src="ontogeny_deep_pelagic_fish_files/figure-html/unnamed-chunk-38-1.png" class="img-fluid" width="576"></p>
+<p><img src="ontogeny_deep_pelagic_fish_files/figure-html/unnamed-chunk-34-1.png" class="img-fluid" width="576"></p>
 </div>
 </div>
 <div class="cell">
@@ -592,7 +332,7 @@ Use function 'rda' to test significance of fractions of interest</code></pre>
 <h2 class="anchored" data-anchor-id="arctozenus-risso"><em>Arctozenus risso</em></h2>
 <div class="cell">
 <div class="cell-output-display">
-<p><img src="ontogeny_deep_pelagic_fish_files/figure-html/unnamed-chunk-41-1.png" class="img-fluid" width="576"></p>
+<p><img src="ontogeny_deep_pelagic_fish_files/figure-html/unnamed-chunk-37-1.png" class="img-fluid" width="576"></p>
 </div>
 </div>
 <div class="cell">
@@ -606,7 +346,7 @@ Use function 'rda' to test significance of fractions of interest</code></pre>
 <h2 class="anchored" data-anchor-id="variance-partitionning-summary">Variance partitionning summary</h2>
 <div class="cell">
 <div class="cell-output-display">
-<p><img src="ontogeny_deep_pelagic_fish_files/figure-html/unnamed-chunk-44-1.png" class="img-fluid" width="1248"></p>
+<p><img src="ontogeny_deep_pelagic_fish_files/figure-html/var_part-1.png" class="img-fluid" width="1248"></p>
 </div>
 </div>
 </section>
@@ -621,7 +361,7 @@ Use function 'rda' to test significance of fractions of interest</code></pre>
 </ul>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="summary_table.jpg" class="img-fluid figure-img" style="width:70.0%"></p>
+<p><img src="ontogeny_deep_pelagic_fish_files/figure-html/summary_table.jpg" class="img-fluid figure-img" style="width:70.0%"></p>
 <p></p><figcaption class="figure-caption">Summary table</figcaption><p></p>
 </figure>
 </div>
@@ -636,14 +376,11 @@ Use function 'rda' to test significance of fractions of interest</code></pre>
 <li><p>If major environmental changes had occurred that significantly altered the baseline over time, this would have been observed in all species in the same way, which does not appear to be the case here</p></li>
 <li><p>Test with <em>Lampnyctus crocodilus</em>: In the bathypelagic layer and individuals between 10 and 12cm : non signifiant differences</p></li>
 <li><p>we can see that the data from the different years merge, there does not seem to be a strong effect of the year of sampling on the <span class="math inline">\(\delta\)</span><sup>15</sup>N values</p></li>
-<li><p>In supplementary material ?</p></li>
-<li><ul>
-<li>only night sampling</li>
-</ul></li>
+<li><p>only night sampling</p></li>
 </ul>
 <div class="cell">
 <div class="cell-output-display">
-<p><img src="ontogeny_deep_pelagic_fish_files/figure-html/unnamed-chunk-45-1.png" class="img-fluid" width="2400"></p>
+<p><img src="ontogeny_deep_pelagic_fish_files/figure-html/temporal_variability-1.png" class="img-fluid" width="1440"></p>
 </div>
 </div>
 </section>
@@ -656,7 +393,15 @@ Use function 'rda' to test significance of fractions of interest</code></pre>
 </ul>
 <div class="cell">
 <div class="cell-output-display">
-<p><img src="ontogeny_deep_pelagic_fish_files/figure-html/unnamed-chunk-46-1.png" class="img-fluid" width="1920"></p>
+<p><img src="ontogeny_deep_pelagic_fish_files/figure-html/data_set-1.png" class="img-fluid" width="1440"></p>
+</div>
+</div>
+</section>
+<section id="non-significant-size-depth-relationships-at-species-level" class="level2">
+<h2 class="anchored" data-anchor-id="non-significant-size-depth-relationships-at-species-level">Non-significant size-depth relationships at species level</h2>
+<div class="cell">
+<div class="cell-output-display">
+<p><img src="ontogeny_deep_pelagic_fish_files/figure-html/size_depth_ns-1.png" class="img-fluid" width="1536"></p>
 </div>
 </div>
 </section>
