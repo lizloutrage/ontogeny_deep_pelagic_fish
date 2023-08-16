@@ -16,14 +16,11 @@ toc-location: left
 page-layout: full
 ---
 
-# 1. Size distribution as a function of depth
+# 1. Relationships between size distribution and depth
 
-## Density plot by depth layer - community level
-
--   Bigger fish at depth ?
-
+## Community level
 ```{r}
-#| echo: false
+#| echo: true
 #| fig-height: 8
 #| fig-width: 7
 #| label: size_depth_community
@@ -33,43 +30,117 @@ library(tidyr)
 library(dplyr)
 library(ggplot2)
 
-size_distribution_complete <- utils::read.csv(here::here("data", "size_distribution_complete.csv"), sep = ";", header = T,dec = ".")
+# Catch data EHVOE 2002-2019 ----
+data_evhoe2002_2019 <- utils::read.csv(here::here("data", "trawling_data_evhoe_2002_2019.csv"), sep = ";", header = T,dec = ".")
 
-# Complete size data set (2002-2021)
-large_dataset <- filter(size_distribution_complete, dataset == "Total")
+# prepare data for EVHOE 2002-20219
+size_data_2002_2019 <- data_evhoe2002_2019%>%
+  # divide by 10 when size in mm and not cm 
+  mutate(size= case_when(Unite_Taille =="mm" ~Taille/10,
+                         Unite_Taille =="cm" ~Taille))%>%
+  select(Code_Station, Nom_Scientifique, Annee, size, Nbr, trawling_depth)%>%
+  na.omit()%>%
+  # selection of species of interest (also sampled for isotopy)
+  filter(Nom_Scientifique%in% c("Stomias boa",
+                                "Lampanyctus crocodilus",
+                                "Myctophum punctatum",
+                                "Aphanopus carbo",
+                                "Melanostigma atlanticum",
+                                "Serrivomer beanii",
+                                "Argyropelecus olfersii",
+                                "Lampanyctus macdonaldi",
+                                "Searsia koefoedi",
+                                "Notoscopelus kroyeri",
+                                "Xenodermichthys copei",
+                                "Arctozenus risso"))%>%
+  tidyr::uncount(Nbr)
 
-large_dataset$depth_layer <- factor(large_dataset$depth_layer, 
-                                  levels = c("epipelagic","upper_mesopelagic",
-                                         "lower_mesopelagic","bathypelagic"),
-                                  labels = c("Epipelagic","Upper mesopelagic",
-                                          "Lower mesopelagic","Bathypelagic"))
+# Catch data EHVOE 2002-2019 ----
+data_evhoe_2021 <- utils::read.csv(here::here("data", "trawling_data_evhoe_2021.csv"), sep = ";", header = T,dec = ".")
 
-ggplot(large_dataset, aes(x=size)) +
-  geom_density(alpha=0.3, linewidth=1, bw=0.2, aes(col=depth_layer, fill= depth_layer))+
-  paletteer::scale_color_paletteer_d("jcolors::pal10")+
-  paletteer::scale_fill_paletteer_d("jcolors::pal10")+
+# prepare data for EVHOE 2021
+size_data_2021 <- data_evhoe_2021%>%
+  # divide by 10 when size in mm and not cm 
+  mutate(size= case_when(Unite_Taille =="mm" ~Taille/10,
+                         Unite_Taille =="cm" ~Taille))%>%
+  select(Code_Station, Nom_Scientifique, Annee, size, Nbr)%>%
+  na.omit()%>%
+  # selection of mesopelagic trawls 
+  filter(Code_Station%in% c("Z0524", "Z0518", "Z0512", "Z0508", 
+                            "Z0503", "Z0497", "Z0492"))%>%
+  # selection of species of interest (also sampled for isotopy)
+  filter(Nom_Scientifique%in% c("Stomias boa",
+                                "Lampanyctus crocodilus",
+                                "Myctophum punctatum",
+                                "Aphanopus carbo",
+                                "Melanostigma atlanticum",
+                                "Serrivomer beanii",
+                                "Argyropelecus olfersii",
+                                "Lampanyctus macdonaldi",
+                                "Searsia koefoedi",
+                                "Notoscopelus kroyeri",
+                                "Xenodermichthys copei",
+                                "Arctozenus risso"))%>%
+  tidyr::uncount(Nbr)%>%
+  # assign depth to a station 
+  mutate(trawling_depth= case_when(Code_Station %in% c("Z0508") ~25,
+                                   Code_Station %in% c("Z0492") ~370,
+                                   Code_Station%in% c("Z0512") ~555,
+                                   Code_Station %in% c("Z0503") ~715,
+                                   Code_Station %in% c("Z0518") ~1000,
+                                   Code_Station %in% c("Z0524") ~1010,
+                                   Code_Station %in% c("Z0497") ~1335))
+  
+# merge dataframes 
+trawling_dataset <- rbind(size_data_2002_2019, size_data_2021)%>%
+  # add column with depth layer (cf 1st paper)
+  mutate(depth_layer= case_when(between(trawling_depth, 0, 174) ~"Epipelagic",
+                               between(trawling_depth, 175, 699)~"Upper mesopelagic",
+                               between(trawling_depth, 700, 999)~"Lower mesopelagic",
+                               between(trawling_depth, 1000, 2000)~"Bathypelagic"))%>%
+  mutate(across(depth_layer, factor, levels = c("Epipelagic", "Upper mesopelagic",
+                                                "Lower mesopelagic", "Bathypelagic")))%>%
+  rename("species"="Nom_Scientifique")
+ 
+# median size in each depth layer 
+median_size_data <- trawling_dataset%>%
+  group_by(depth_layer)%>%
+  summarise(median_size =median(size))%>%
+  mutate(across(depth_layer, factor, levels = c("Epipelagic", "Upper mesopelagic",
+                                                "Lower mesopelagic", "Bathypelagic")))
+
+ggplot(trawling_dataset, aes(x=size)) +
+  geom_density(alpha=0.5, linewidth=0.6, bw=0.2, aes(col=depth_layer, fill= depth_layer))+
+  scale_fill_manual(values = c("#93C3FF", "#6799D3","#3A72A8", "#002A58"))+
+  scale_color_manual(values = c("#93C3FF", "#6799D3","#3A72A8", "#002A58"))+
   facet_wrap(~depth_layer, ncol=1, scales = "free_y") +
   theme_minimal()+
   scale_x_continuous(trans = 'log2') +
-  theme(strip.text.x = element_text(size=12,face="bold"),
-        strip.text.y = element_text(size=12),
-        axis.title = element_text(size=12),
-        axis.text =  element_text(size=12, color= "grey50"),
+  theme(strip.text.x = element_text(size=9,face="bold"),
+        strip.text.y = element_text(size=9),
+        axis.title = element_text(size=9),
+        axis.text =  element_text(size=9, color= "grey50"),
         panel.background=element_rect(color="white"),
-        legend.title = element_text(size=12),
-        legend.text = element_text(size=12))+
+        plot.background = element_rect(color = "white"),
+        legend.title = element_text(size=9),
+        legend.text = element_text(size=9))+
   guides(fill="none",col="none")+
-  xlab("log2 standard Length (cm)")
+  xlab("Log2 total length (cm)")+
+  geom_vline(data =median_size_data, aes(xintercept = median_size, color=depth_layer),
+             linewidth=0.6, linetype="dashed")
+
+#ggsave("density_plot_community.png", path = "figures", dpi = 700, height = 6, width = 6)
 
 ```
-### Test of the significance of the size-depth relationship - community level
+
+### Linear relationship
 ```{r}
-#| echo: false
+#| echo: true
 #| fig-height: 5
 #| fig-width: 7
 #| label: size_depth_community_lm
 
-ggplot(large_dataset, aes(x=trawling_depth, y=size))+
+ggplot(trawling_dataset, aes(x=trawling_depth, y=size))+
   geom_point (alpha=0.4) + 
   geom_smooth(method=lm, se=T, alpha=0.2, col= alpha("darkblue",0.7)) +
   ggpmisc::stat_poly_eq(formula = y ~ x, 
@@ -80,8 +151,8 @@ ggplot(large_dataset, aes(x=trawling_depth, y=size))+
                         label.x.npc = "right",
                         label.y.npc = "bottom",
                         vstep = -0.0005)+
-  scale_y_continuous(trans = 'log2') +
-  ylab(bquote(log[2]~"standard length (cm)"))+
+  #scale_y_continuous(trans = 'log2') +
+  #ylab(bquote(log[2]~"standard length (cm)"))+
   xlab("Depth (m)")+
   guides(color="none", fill="none")+
   theme_minimal()+
@@ -89,54 +160,60 @@ ggplot(large_dataset, aes(x=trawling_depth, y=size))+
         axis.text =  element_text(size=12, color= "grey50"))
 ```
 
-
-## Density plot by depth layer - species level
-
--  Only significant relationships (non-significant relationships in supplementary materials)
+## Species level
 ```{r}
-#| echo: false
+#| echo: true
 #| fig-height: 10
 #| fig-width: 13
 #| label: size_depth_species
 
 # selection of species with a significant size-depth relationship 
-large_dataset_significant <- filter(large_dataset, 
+trawling_dataset_significant <- filter(trawling_dataset, 
                                     species %in% c("Lampanyctus crocodilus","Melanostigma atlanticum",
                                                    "Xenodermichthys copei","Myctophum punctatum"))
 
-large_dataset_significant$species <- factor(large_dataset_significant$species,
+trawling_dataset_significant$species <- factor(trawling_dataset_significant$species,
                                     levels = c("Lampanyctus crocodilus",
                                              "Melanostigma atlanticum",
                                              "Xenodermichthys copei",
                                              "Myctophum punctatum"))
     
 
-ggplot(large_dataset_significant, aes(x=size)) +
-  geom_density(alpha=0.3, linewidth=0.8, adjust= 2, aes(fill= depth_layer, col= depth_layer))+
-  geom_histogram(aes(y=..density.., fill= depth_layer, col= depth_layer), alpha=0.2, 
-                 position="identity", binwidth = 1)+
-  paletteer::scale_color_paletteer_d("jcolors::pal10")+
-  paletteer::scale_fill_paletteer_d("jcolors::pal10")+
+median_size_species <- trawling_dataset_significant%>%
+  group_by(species, depth_layer)%>%
+  summarise(median_size_sp= median(size))
+
+ggplot(trawling_dataset_significant, aes(x=size)) +
+  geom_density(alpha=0.3, linewidth=0.5, adjust= 2, aes(fill= depth_layer, col= depth_layer))+
+  scale_fill_manual(values = c("#93C3FF", "#6799D3","#3A72A8", "#002A58"))+
+  scale_color_manual(values = c("#93C3FF", "#6799D3","#3A72A8", "#002A58"))+
   facet_grid(depth_layer~species, scale="free")+
   theme_minimal()+
-  theme(strip.text.x = element_text(size=16,face="italic"),
-        strip.text.y = element_text(size=15),
-        axis.title = element_text(size=15),
-        axis.text =  element_text(size=15, color= "grey50"),
+  theme(strip.text.x = element_text(size=12,face="italic"),
+        strip.text.y = element_text(size=11),
+        axis.title = element_text(size=13),
+        axis.text =  element_text(size=10, color= "grey50"),
         panel.background=element_rect(color="white"),
-        legend.title = element_text(size=17),
-        legend.text = element_text(size=17))+
+        plot.background = element_rect(color = "white"),
+        legend.title = element_text(size=10),
+        legend.text = element_text(size=10))+
   guides(fill="none",col="none")+
-  xlab("Standard Length (cm)")
+  xlab("Total length (cm)")+
+  geom_vline(data =median_size_species, aes(xintercept = median_size_sp, color=depth_layer), 
+             linewidth=0.6, linetype="dashed")
+
+#ggsave("density_plot_species.png", path = "figures", dpi = 700, height = 7, width = 9)
+
 ```
-# Linear relationships
+
+### Linear relationships
 ```{r}
-#| echo: false
+#| echo: true
 #| fig-height: 7
 #| fig-width: 10
 #| label: size_depth_species_lm
 
-ggplot(large_dataset_significant, aes(x=trawling_depth, y=size))+
+ggplot(trawling_dataset_significant, aes(x=trawling_depth, y=size))+
   geom_point (alpha=0.4) + 
   facet_wrap(~species, scales = "free")+
   geom_smooth(method=lm, se=T, alpha=0.2, col= alpha("darkblue",0.7)) + 
@@ -148,33 +225,26 @@ ggplot(large_dataset_significant, aes(x=trawling_depth, y=size))+
                         label.x.npc = "right",
                         label.y.npc = "bottom",
                         vstep = -0.0005)+ 
-  xlab(bquote(log[2]~"standard length (cm)"))+
-  ylab("Depth (m)")+
+  ylab("standard length (cm)")+
+  xlab("Depth (m)")+
   guides(fill="none")+
   theme_minimal()+
   theme(strip.text.x = element_text(size=10,face="italic"),
         axis.title = element_text(size=10),
         axis.text =  element_text(size=10))
+
 ```
 
 
 # 2. $\delta$<sup>15</sup>N-size relationships
 
--   Sampling of some individuals to obtain $\delta$<sup>15</sup>N values
 
 ## At community level
-
--   Can we observe an increase in $\delta$<sup>15</sup>N values (proxy of trophic level) with increasing size of individuals in the deep pelagic fish community of the Bay of Biscay?
-
--   X axis (size) in log<sub>2</sub>
-
--   Significant increase but very small slope
-
 ```{r}
-#| echo: false
+#| echo: true
 #| label: d15n_size_community
 
-ontogeny_data <- utils::read.csv(here::here("data", "ontogeny.csv"), sep = ";", header = T,dec = ",")
+ontogeny_data <- utils::read.csv(here::here("data", "ontogeny_isotopy_data.csv"), sep = ";", header = T,dec = ",")
 
 ontogeny_data$species <- factor(ontogeny_data$species,
                                levels = c("Stomias_boa",
@@ -203,7 +273,7 @@ ontogeny_data$species <- factor(ontogeny_data$species,
                                           "Arctozenus risso"))
 
 ggplot(ontogeny_data , aes(x=size, y=d15N_muscle_untreated))+
-  geom_point (alpha=0.4) + 
+  geom_point (alpha=0.4, size=1) + 
   geom_smooth(method=lm, se=T, alpha=0.2, col= alpha("darkblue",0.7)) + 
   ggpmisc::stat_poly_eq(formula = y ~ x, 
                         aes(label = paste(..eq.label.., ..rr.label.., ..p.value.label.. 
@@ -214,15 +284,19 @@ ggplot(ontogeny_data , aes(x=size, y=d15N_muscle_untreated))+
                         label.y.npc = "bottom",
                         vstep = -0.0005)+ 
   scale_x_continuous(trans = 'log2') +
-  xlab(bquote(log[2]~"standard length (cm)"))+
+  xlab(bquote(Log[2]~"standard length (cm)"))+
   ylab(expression({delta}^15*N~'\u2030'))+
   ylim(c(7, 14))+
   guides(fill="none")+
   theme_minimal()+
   theme(strip.text.x = element_text(size=12,face="italic"),
         axis.title = element_text(size=12),
-        axis.text =  element_text(size=12))
+        axis.text =  element_text(size=12),
+        plot.background = element_rect(colour = "white"))
+
+##ggsave("d15n_size_community.png", path = "figures", dpi = 700)
 ```
+
 
 ## At species level
 
@@ -232,8 +306,28 @@ ggplot(ontogeny_data , aes(x=size, y=d15N_muscle_untreated))+
 -  __Coefficient of variation__: The dispersion of the $\delta$<sup>15</sup>N values is not the same between the species having shown non-significant $\delta$<sup>15</sup>N-size relationships: *X. copei* presents a strong dispersion of its values (CV = 6.57) contrary to the values of *N. kroyeri* which remain relatively stable with the size of its individuals (CV = 2.15)
 -   Do these differences translate into differences in their feeding strategies?
 
+### Data summary
 ```{r}
 #| echo: false
+#| warning: false
+#| label: range_size_sp 
+
+data_sum <- ontogeny_data%>%
+  group_by(species)%>%
+  summarise(range_size= max(size)-min(size),
+            min_size=min(size),
+            max_size=max(size),
+            mean_size=mean(size),
+            mean_d15n=mean(d15N_muscle_untreated))%>%
+   mutate(across(where(is.numeric), round, 2))
+  
+
+htmltools::tagList(DT::datatable(data_sum))
+```
+
+### Linear relationships 
+```{r}
+#| echo: true
 #| warning: false
 #| fig-height: 15
 #| fig-width: 10
@@ -272,10 +366,10 @@ plot_significant <- ggplot(ontogeny_significant, aes(x=size, y=d15N_muscle_untre
   ylim(c(7,13))+
   guides(color="none", fill="none")+
   theme_minimal()+
-  theme(strip.text.x = element_text(size=15,face="italic"),
-        axis.title = element_text(size=15),
-        axis.text =  element_text(size=15))
-
+  theme(strip.text.x = element_text(size=13,face="italic"),
+        plot.background = element_rect(colour = "white"),
+        axis.title = element_text(size=13),
+        axis.text =  element_text(size=13))
 
 # Selection of species presenting non-significant d15N-size relationship
 ontogeny_non_significant <- filter(ontogeny_data,
@@ -315,57 +409,27 @@ plot_non_significant <- ggplot(ontogeny_non_significant, aes(x=size, y=d15N_musc
   ylim(c(7, 14))+
   guides(color="none", fill="none")+
   theme_minimal()+
-  theme(strip.text.x = element_text(size=15,face="italic"),
-        axis.title = element_text(size=15),
-        axis.text =  element_text(size=15))+
+  theme(strip.text.x = element_text(size=13,face="italic"),
+        axis.title = element_text(size=13),
+        plot.background = element_rect(colour = "white"),
+        axis.text =  element_text(size=13))+
   geom_text(coeff_var, mapping = aes(x = -Inf, y = -Inf, label = paste("CV = ", d15N_muscle_untreated, sep = "")),
-    hjust = -0.2, vjust   = -1.1, size = 4)
+            hjust = -0.2, vjust = -0.8, size = 4)
 
 ggpubr::ggarrange(plot_significant, plot_non_significant, ncol=1, labels = c("A", "B"),
-                  heights = c(2,1.2))
+                  heights = c(2, 1.25))
+
+#ggsave("d15n_size_sp.png", path = "figures", dpi = 700, height = 13, width = 10)
 
 ```
+
+
 
 # 4. Variation partitionning
 
 -   At the species level, is it the sampling depth or the size of the individuals that most influences the values in $\delta$<sup>15</sup>N?
 -  To test the significance of the influence of each variable (depth and size) on \(\delta\)$^{15}$N values an ANOVA-type permutation test was performed for each model (anova.cca function)
 -  Since the third fraction is not the result of an RDA, it cannot be tested for significance.
-
-## At community level
-
-```{r}
-#| echo: false
-#| warning: false 
-#| fig-height: 6
-#| fig-width: 6
-
-ontogeny_part <- vegan::varpart(ontogeny_data$d15N_muscle_untreated,
-                            ~trawling_depth, ~size, data=ontogeny_data)
-plot(ontogeny_part,
-     Xnames = c("Depth", "size"), # name the partitions
-     bg = c("#072AC8", "#0B5345"), alpha = 100, # colour the circles
-     digits = 2, # only show 2 digits
-     cex = 1.4)
-```
-
-```{r}
-#| echo: false
-#| warning: false
-#| output: false
-
-# Significance testing - depth alone 
-vegan::anova.cca(vegan::rda(ontogeny_data$d15N_muscle_untreated, ontogeny_data$trawling_depth, ontogeny_data$size))
-```
-
-```{r}
-#| echo: false
-#| output: false
-#| warning: false 
-
-# Significance testing - size alone 
-vegan::anova.cca(vegan::rda(ontogeny_data$d15N_muscle_untreated, ontogeny_data$size, ontogeny_data$trawling_depth))
-```
 
 ## *Lampanyctus crocodilus*
 
@@ -384,7 +448,6 @@ plot(lamp_cro_part,
      digits = 2, # only show 2 digits
      cex = 1.4)
 ```
-
 
 ```{r}
 #| echo: false
@@ -704,7 +767,6 @@ variation_coeffcients <- utils::read.csv(here::here("data", "variation_coeffcien
 variation_coeffcients$species <- factor(variation_coeffcients$species,
                                         levels = c("Notoscopelus kroyeri",
                                                    "Searsia koefoedi",
-                                                   "Community",
                                                    "Lampanyctus macdonaldi",
                                                    "Xenodermichthys copei",
                                                    "Arctozenus risso",
@@ -726,50 +788,31 @@ var_freq$relation <- factor(var_freq$relation,
 
 # Stacked + percent
 ggplot(var_freq , aes(fill=relation, y=freq, x=species)) + 
-  geom_bar(position="stack", stat="identity", alpha=0.6, size=0.5, aes(col=relation))+
-  scale_fill_manual(values = c("grey", "#33505C","#861D31","#D8973C"))+
-  scale_colour_manual(values = c("grey", "#33505C","#861D31","#D8973C"))+
-  theme_minimal()+
+  geom_bar(position="stack", stat="identity", alpha=0.6, linewidth=0.5)+
+  scale_fill_manual(values = c("#33505C","#861D31","#D8973C"))+
+  theme_light()+
   coord_flip()+
-  ylab("Pourcentage variance (%)")+
-  theme(axis.text.y = element_text(face ="italic", size=16),
-        axis.title = element_text(size=16),
-        legend.text = element_text(size=16),
-        legend.title = element_text(size=16),
-        axis.text.x = element_text(size=16))+
+  ylim(c(0,40))+
+  ylab("Percentage variance (%)")+
+  xlab("")+
+  theme(axis.text.y = element_text(face ="italic", size=11),
+        axis.title = element_text(size=11),
+        legend.text = element_text(size=11),
+        legend.title = element_text(size=11),
+        axis.text.x = element_text(size=11))+
   guides(fill=guide_legend(title="Explanatory variables"),
          color="none")
-        
+
+#ggsave("variations_coeff.png", path = "figures", dpi = 700, width = 8, height = 5)
 ```
 
-# 5. Summary table
 
-**Testing significance:**
-
--   $\delta$<sup>15</sup>N - Size & $\delta$<sup>15</sup>N - depth : use of the anova.cca() function to test the significance of each part separately (depth & size) on the variability of $\delta$<sup>15</sup>N values
--   Depth - size : test with linear model lm (size\~depth)
--   *Stomias boa* & *Aphanopus carbo* \* depth range too small (\< 100m) so no use of variance partition models on these species, but linear models $\delta$<sup>15</sup>N - size significant
-
-![Summary table](ontogeny_deep_pelagic_fish_files/figure-html/summary_table.jpg){width="70%"}
-
-# 6. Limits
+# 5. Supplementary material
 
 ## Test of temporal variability on $\delta$<sup>15</sup>N values
 
--   Difficult to test because it is necessary to eliminate the biases due to size and depth.
-
--   However, over 90% of the sampling has been completed between 2019 and 2021 (and almost 3/4 in 2021)
-
--   If major environmental changes had occurred that significantly altered the baseline over time, this would have been observed in all species in the same way, which does not appear to be the case here
-
--   Test with *Lampnyctus crocodilus*: In the bathypelagic layer and individuals between 10 and 12cm : non signifiant differences
-
--   we can see that the data from the different years merge, there does not seem to be a strong effect of the year of sampling on the $\delta$<sup>15</sup>N values
-
- -   only night sampling
-
 ```{r}
-#| echo: false
+#| echo: true
 #| warning: false 
 #| fig-height: 10
 #| fig-width: 15
@@ -777,52 +820,82 @@ ggplot(var_freq , aes(fill=relation, y=freq, x=species)) +
 
 ontogeny_data$years <- as.character(ontogeny_data$years)
 
+col_years <- c("#FFC75F", "#F3C5FF", "#845EC2", "#C34A36", "#3596B5", "grey")
 ggplot(ontogeny_data , aes(x=size, y=d15N_muscle_untreated))+
-  geom_point (alpha=0.7, aes(col=years), size=2.5) + 
-  paletteer::scale_color_paletteer_d("ggsci::default_ucscgb")+
-  facet_wrap(~species, scale="free_x")+ 
+  geom_point (alpha=0.9, aes(col=years), size=2.2) + 
+  scale_color_manual(values = col_years)+
+  facet_wrap(~species, scale="free_x", ncol=3)+ 
   xlab("Standard Length (cm)")+
   ylab(expression({delta}^15*N~'\u2030'))+
-  theme_minimal()+
-  theme(strip.text.x = element_text(size=18,face="italic"),
-        axis.title = element_text(size=18),
-        axis.text =  element_text(size=18),
-        legend.title = element_text(size=18),
-        legend.text = element_text(size=18))
+  theme_light()+
+  labs(col= "Sampling Years")+
+  theme(strip.text.x = element_text(size=15,face="italic"),
+        axis.title = element_text(size=14),
+        axis.text =  element_text(size=14),
+        legend.title = element_text(size=14),
+        legend.text = element_text(size=14),
+        panel.background = element_rect(fill = "white",colour = "white"),
+        plot.background = element_rect(fill = "white",colour = "white"))
+
+##ggsave("years_sampling.png", path = "figures", dpi = 700, height = 10, width = 11)
 
 ```
 
-## Representativeness of the sampling of individuals for $\delta$<sup>15</sup>N values
-
--   In supplementary material ?
--   no sampling of small *M. atlanticum* and big *L. macdonaldi*
--   but overall good sampling coverage over the size ranges of the species
-
+## representativeness of sample sizes between the two data sets 
 ```{r}
-#| echo: false
+#| echo: true
 #| warning: false 
 #| fig-height: 10
 #| fig-width: 15
 #| label: data_set
 
-ggplot(size_distribution_complete, aes(x=size)) +
-  geom_density(alpha=0.3, linewidth=0.7, aes(col=dataset, fill= dataset))+
-  scale_color_manual(values = c("#6FB668", "#A070FF"), labels = c("Isotopic data set", "Initial data set"))+
-  scale_fill_manual(values = c("#6FB668", "#A070FF"), labels = c("Isotopic data set", "Initial data set"))+
-  facet_wrap(~species, scale="free")+
+ontogeny_data_TL <- ontogeny_data%>%
+  # conversion standard length in total length (equations Tiphaine)
+  mutate(total_length = case_when(species=="Aphanopus carbo" & size<85~size+3,
+                                  species=="Aphanopus carbo" & size>85~size+5,
+                                  species=="Arctozenus risso" ~size+1,
+                                  species=="Argyropelecus olfersii"~ (size+0.7913)/0.9039,
+                                  species=="Lampanyctus crocodilus"~ (size+0.4754)/0.8284,
+                                  species=="Lampanyctus macdonaldi"~ (size+0.4754)/0.8284,
+                                  species=="Melanostigma atlanticum"~size,
+                                  species=="Myctophum punctatum"~(size-1.0381)/0.7373,
+                                  species=="Notoscopelus kroyeri"~ (size+0.2406)/0.8903,
+                                  species=="Searsia koefoedi"~(size-0.7343)/0.8593,
+                                  species=="Serrivomer beanii"~(size+0.6654)/1.0053,
+                                  species=="Stomias boa"~(size+0.2633)/0.9679,
+                                  species=="Xenodermichthys copei"~(size+0.0631)/0.9266))%>%
+  select(species, total_length)%>%
+  mutate(data_set="isotopic dataset")%>%
+  rename("size"="total_length")
+
+trawling_dataset_comparaison <- trawling_dataset%>%
+  select(species, size)%>%
+  mutate(data_set="trawling dataset")
+
+# merge the two data frame
+size_comparaison <- rbind(trawling_dataset_comparaison,ontogeny_data_TL)
+
+ggplot(size_comparaison, aes(x=size)) +
+  geom_density(alpha=0.3, linewidth=0.7, aes(col=data_set, fill= data_set))+
+  scale_color_manual(values = c("#3596B5", "#B0A8B9"), labels = c("Isotopic dataset", "Trawling dataset"))+
+  scale_fill_manual(values = c("#3596B5", "#B0A8B9"), labels = c("Isotopic dataset", "Trawling dataset"))+
+  facet_wrap(~species, scale="free", ncol=3)+
   theme_minimal()+
-  theme(strip.text.x = element_text(size=15,face="italic"),
-        axis.title = element_text(size=22),
-        axis.text =  element_text(size=15, color= "grey50"),
-        panel.background=element_rect(color="white"),
-        legend.title = element_text(size=20),
-        legend.text = element_text(size=20))+
+  theme(strip.text.x = element_text(size=16,face="italic"),
+        axis.title = element_text(size=16),
+        axis.text =  element_text(size=16),
+        legend.title = element_text(size=16),
+        legend.text = element_text(size=16),
+        panel.background = element_rect(fill = "white",colour = "white"),
+        plot.background = element_rect(fill = "white",colour = "white"))+
   xlab("Standard length (cm)")+
   guides(fill=guide_legend(title="Dataset"), col=guide_legend(title="Dataset"))
+
+##ggsave("dataset.png", path = "figures", dpi = 700, width = 12, height = 9)
+
 ```
 
 ## Non-significant size-depth relationships at species level
-
 ```{r}
 #| echo: false
 #| warning: false 
@@ -831,14 +904,15 @@ ggplot(size_distribution_complete, aes(x=size)) +
 #| label: size_depth_ns
 
 # Selection of non-significant size-depth relationships
-large_dataset_ns <- filter(large_dataset, species %in% c("Arctozenus risso", "Lampanyctus macdonaldi",
+trawling_dataset_ns <- filter(trawling_dataset, species %in% c("Arctozenus risso", 
+                                                               "Lampanyctus macdonaldi",
                                                          "Notoscopelus kroyeri", "Searsia koefoedi",
                                                          "Serrivomer beanii","Argyropelecus olfersii",
-                                                         "Stomias boa", "Aphanopus carbo"))
+                                                         "Stomias boa boa", "Aphanopus carbo"))
 
-large_dataset_ns$species <- factor(large_dataset_ns$species,
+trawling_dataset_ns$species <- factor(trawling_dataset_ns$species,
                             levels=c("Notoscopelus kroyeri", "Serrivomer beanii", 
-                                     "Stomias boa","Argyropelecus olfersii",
+                                     "Stomias boa boa","Argyropelecus olfersii",
                                      "Arctozenus risso", "Searsia koefoedi",
                                      "Aphanopus carbo", "Lampanyctus macdonaldi"),
                             labels = c("N. kroyeri", "S. beanii", 
@@ -847,22 +921,30 @@ large_dataset_ns$species <- factor(large_dataset_ns$species,
                                      "A. carbo", "L.macdonaldi"))
 
 # Density plot 
-ggplot(large_dataset_ns, aes(x=size)) +
+median_size_sp_ns <- trawling_dataset_ns%>%
+  group_by(depth_layer, species)%>%
+  summarise(median_size =median(size))
+
+
+ggplot(trawling_dataset_ns, aes(x=size)) +
   geom_density(alpha=0.3, linewidth=0.8, adjust= 2, aes(fill= depth_layer, col= depth_layer))+
-  geom_histogram(aes(y=..density.., fill= depth_layer, col= depth_layer), alpha=0.2, 
-                 position="identity", binwidth = 1)+
-  paletteer::scale_color_paletteer_d("jcolors::pal10")+
-  paletteer::scale_fill_paletteer_d("jcolors::pal10")+
+  scale_fill_manual(values = c("#93C3FF", "#6799D3","#3A72A8", "#002A58"))+
+  scale_color_manual(values = c("#93C3FF", "#6799D3","#3A72A8", "#002A58"))+
   facet_grid(depth_layer~species, scale="free")+
   theme_minimal()+
-  theme(strip.text.x = element_text(size=20, face="italic"),
+  theme(strip.text.x = element_text(size=15.5, face="italic"),
         strip.text.y = element_text(size=16),
         axis.title = element_text(size=19),
-        axis.text =  element_text(size=16, color= "grey50"),
+        axis.text =  element_text(size=14, color= "grey50"),
         panel.background=element_rect(color="white"),
+        plot.background = element_rect(fill = "white",colour = "white"),
         legend.title = element_text(size=19),
         legend.text = element_text(size=17))+
   guides(fill="none",col="none")+
-  xlab("Standard Length (cm)")
+  xlab("Total Length (cm)")+
+  geom_vline(data =median_size_sp_ns, aes(xintercept = median_size, color=depth_layer),
+             linewidth=0.6, linetype="dashed")
+
+#ggsave("depth_size_all.png", path = "figures", dpi = 700, width = 12, height = 9)
 ```
 
