@@ -17,7 +17,7 @@ toc-location: left
 page-layout: full
 ---
 
-# 1. Relationships between size distribution and depth
+# 1. Relationships between size and depth
 
 ## Community level
 - Bigger fish at depth? 
@@ -27,83 +27,21 @@ page-layout: full
 #| fig-width: 7
 #| label: size_depth_community
 
-#Library
+# Library
 library(tidyr)
 library(dplyr)
 library(ggplot2)
 
-# Catch data EHVOE 2002-2019 ----
-data_evhoe2002_2019 <- utils::read.csv(here::here("data", "trawling_data_evhoe_2002_2019.csv"), sep = ";", header = T,dec = ".")
-
-# prepare data for EVHOE 2002-20219
-size_data_2002_2019 <- data_evhoe2002_2019%>%
-  # divide by 10 when size in mm and not cm 
-  mutate(size= case_when(Unite_Taille =="mm" ~Taille/10,
-                         Unite_Taille =="cm" ~Taille))%>%
-  select(Code_Station, Nom_Scientifique, Annee, size, Nbr, trawling_depth)%>%
-  na.omit()%>%
-  # selection of species of interest (also sampled for isotopy)
-  filter(Nom_Scientifique%in% c("Stomias boa",
-                                "Lampanyctus crocodilus",
-                                "Myctophum punctatum",
-                                "Aphanopus carbo",
-                                "Melanostigma atlanticum",
-                                "Serrivomer beanii",
-                                "Argyropelecus olfersii",
-                                "Lampanyctus macdonaldi",
-                                "Searsia koefoedi",
-                                "Notoscopelus kroyeri",
-                                "Xenodermichthys copei",
-                                "Arctozenus risso"))%>%
-  tidyr::uncount(Nbr)
-
-# Catch data EHVOE 2002-2019 ----
-data_evhoe_2021 <- utils::read.csv(here::here("data", "trawling_data_evhoe_2021.csv"), sep = ";", header = T,dec = ".")
-
-# prepare data for EVHOE 2021
-size_data_2021 <- data_evhoe_2021%>%
-  # divide by 10 when size in mm and not cm 
-  mutate(size= case_when(Unite_Taille =="mm" ~Taille/10,
-                         Unite_Taille =="cm" ~Taille))%>%
-  select(Code_Station, Nom_Scientifique, Annee, size, Nbr)%>%
-  na.omit()%>%
-  # selection of mesopelagic trawls 
-  filter(Code_Station%in% c("Z0524", "Z0518", "Z0512", "Z0508", 
-                            "Z0503", "Z0497", "Z0492"))%>%
-  # selection of species of interest (also sampled for isotopy)
-  filter(Nom_Scientifique%in% c("Stomias boa",
-                                "Lampanyctus crocodilus",
-                                "Myctophum punctatum",
-                                "Aphanopus carbo",
-                                "Melanostigma atlanticum",
-                                "Serrivomer beanii",
-                                "Argyropelecus olfersii",
-                                "Lampanyctus macdonaldi",
-                                "Searsia koefoedi",
-                                "Notoscopelus kroyeri",
-                                "Xenodermichthys copei",
-                                "Arctozenus risso"))%>%
-  tidyr::uncount(Nbr)%>%
-  # assign depth to a station 
-  mutate(trawling_depth= case_when(Code_Station %in% c("Z0508") ~25,
-                                   Code_Station %in% c("Z0492") ~370,
-                                   Code_Station%in% c("Z0512") ~555,
-                                   Code_Station %in% c("Z0503") ~715,
-                                   Code_Station %in% c("Z0518") ~1000,
-                                   Code_Station %in% c("Z0524") ~1010,
-                                   Code_Station %in% c("Z0497") ~1335))
-  
-# merge dataframes 
-trawling_dataset <- rbind(size_data_2002_2019, size_data_2021)%>%
-  # add column with depth layer (cf 1st paper)
+# Load trawling data set (individuals size and trawling depth)
+trawling_dataset <- utils::read.csv(here::here("data", "trawling_dataset.csv"), sep = ";", header = T, dec = ",")%>%
+  # add column with depth layer (cf Loutrage et al., 2023)
   mutate(depth_layer= case_when(between(trawling_depth, 0, 174) ~"Epipelagic",
                                between(trawling_depth, 175, 699)~"Upper mesopelagic",
                                between(trawling_depth, 700, 999)~"Lower mesopelagic",
                                between(trawling_depth, 1000, 2000)~"Bathypelagic"))%>%
   mutate(across(depth_layer, factor, levels = c("Epipelagic", "Upper mesopelagic",
-                                                "Lower mesopelagic", "Bathypelagic")))%>%
-  rename("species"="Nom_Scientifique")
- 
+                                                "Lower mesopelagic", "Bathypelagic")))
+
 # median size in each depth layer 
 median_size_data <- trawling_dataset%>%
   group_by(depth_layer)%>%
@@ -111,6 +49,7 @@ median_size_data <- trawling_dataset%>%
   mutate(across(depth_layer, factor, levels = c("Epipelagic", "Upper mesopelagic",
                                                 "Lower mesopelagic", "Bathypelagic")))
 
+# plot 
 ggplot(trawling_dataset, aes(x=size)) +
   geom_density(alpha=0.5, linewidth=0.6, bw=0.2, aes(col=depth_layer, fill= depth_layer))+
   scale_fill_manual(values = c("#93C3FF", "#6799D3","#3A72A8", "#002A58"))+
@@ -131,8 +70,8 @@ ggplot(trawling_dataset, aes(x=size)) +
   geom_vline(data =median_size_data, aes(xintercept = median_size, color=depth_layer),
              linewidth=0.6, linetype="dashed")
 
-#store the plot in the "figures" file in high resolution 
-ggsave("density_plot_community.png", path = "figures", dpi = 700, height = 6, width = 6)
+# store the plot in the "figures" file in high resolution 
+#ggsave("density_plot_community.png", path = "figures", dpi = 700, height = 6, width = 6)
 ```
 
 ### Linear relationship
@@ -140,7 +79,11 @@ ggsave("density_plot_community.png", path = "figures", dpi = 700, height = 6, wi
 #| echo: true
 #| label: size_depth_community_lm
 
-broom::tidy(lm(size~trawling_depth, data = trawling_dataset))
+lr_size_depth_community <- trawling_dataset %>%
+  do(broom::tidy(lm(size~trawling_depth, .)))%>%
+  mutate(across(where(is.numeric), round, 2))
+
+htmltools::tagList(DT::datatable(lr_size_depth_community ))
 ```
 
 ## Species level
@@ -149,21 +92,22 @@ broom::tidy(lm(size~trawling_depth, data = trawling_dataset))
 #| echo: true
 #| label: size_depth_species_lm
 
-linar_regression_size_depth_sp <- trawling_dataset %>%
+lr_size_depth_sp <- trawling_dataset %>%
   group_by(species)%>%
-  do(broom::tidy(lm(size~trawling_depth, .)))
+  do(broom::tidy(lm(size~trawling_depth, .)))%>%
+  mutate(across(where(is.numeric), round, 2))
 
-htmltools::tagList(DT::datatable(linar_regression_size_depth_sp))
+htmltools::tagList(DT::datatable(lr_size_depth_sp))
 ```
 
-### Density plot for significant relationships 
+### Density plot for significant relationships at the species level
 ```{r}
 #| echo: true
 #| fig-height: 10
 #| fig-width: 13
 #| label: size_depth_species
 
-# selection of species with a significant size-depth relationship 
+# selection of species with a significant size-depth relationship (from linear relationships)
 trawling_dataset_significant <- filter(trawling_dataset, 
                                     species %in% c("Lampanyctus crocodilus","Melanostigma atlanticum",
                                                    "Xenodermichthys copei","Myctophum punctatum"))
@@ -174,11 +118,12 @@ trawling_dataset_significant$species <- factor(trawling_dataset_significant$spec
                                              "Xenodermichthys copei",
                                              "Myctophum punctatum"))
     
-
+# Median depth
 median_size_species <- trawling_dataset_significant%>%
   group_by(species, depth_layer)%>%
   summarise(median_size_sp= median(size))
 
+# plot
 ggplot(trawling_dataset_significant, aes(x=size)) +
   geom_density(alpha=0.3, linewidth=0.5, adjust= 2, aes(fill= depth_layer, col= depth_layer))+
   scale_fill_manual(values = c("#93C3FF", "#6799D3","#3A72A8", "#002A58"))+
@@ -198,22 +143,22 @@ ggplot(trawling_dataset_significant, aes(x=size)) +
   geom_vline(data =median_size_species, aes(xintercept = median_size_sp, color=depth_layer), 
              linewidth=0.6, linetype="dashed")
 
-#store the plot in the "figures" file in high resolution 
-ggsave("density_plot_species.png", path = "figures", dpi = 700, height = 7, width = 9)
+# store the plot in the "figures" file in high resolution 
+#ggsave("density_plot_species.png", path = "figures", dpi = 700, height = 7, width = 9)
 ```
 
 
 # 2. $\delta$<sup>15</sup>N-size relationships
-
 ## At community level
 ```{r}
 #| echo: true
 #| label: d15n_size_community
 
-ontogeny_data <- utils::read.csv(here::here("data", "ontogeny_isotopy_data.csv"), sep = ";", header = T,dec = ",")%>%
-  mutate(species= gsub("_"," ", species))
+# Load isotope data
+isotope_data <- utils::read.csv(here::here("data", "ontogeny_isotopy_data.csv"), sep = ";", header = T, dec = ",")
 
-ggplot(ontogeny_data , aes(x=size, y=d15N_muscle_untreated))+
+# plot
+ggplot(isotope_data , aes(x=size, y=d15N))+
   geom_point (alpha=0.4, size=1) + 
   geom_smooth(method=lm, se=T, alpha=0.2, col= alpha("darkblue",0.7)) + 
   ggpmisc::stat_poly_eq(formula = y ~ x, 
@@ -235,8 +180,8 @@ ggplot(ontogeny_data , aes(x=size, y=d15N_muscle_untreated))+
         axis.text =  element_text(size=12),
         plot.background = element_rect(colour = "white"))
 
-#store the plot in the "figures" file in high resolution 
-ggsave("d15n_size_community.png", path = "figures", dpi = 700)
+# store the plot in the "figures" file in high resolution 
+#ggsave("d15n_size_community.png", path = "figures", dpi = 700)
 ```
 
 
@@ -247,25 +192,25 @@ ggsave("d15n_size_community.png", path = "figures", dpi = 700)
 #| warning: false
 #| label: range_size_sp 
 
-data_sum <- ontogeny_data%>%
+data_sum <- isotope_data%>%
   group_by(species)%>%
   summarise(range_size= max(size)-min(size),
             min_size=min(size),
             max_size=max(size),
             mean_size=mean(size),
-            mean_d15n=mean(d15N_muscle_untreated),
+            mean_d15n=mean(d15N),
             range_depth= max(trawling_depth)- min(trawling_depth))%>%
    mutate(across(where(is.numeric), round, 2))
 
 htmltools::tagList(DT::datatable(data_sum))
 ```
 
+### Linear relationships 
+
 -  __A__: significant relationships 
 -  __B__: non-significant relationships 
 -  __Coefficient of variation__: The dispersion of the $\delta$<sup>15</sup>N values is not the same between the species having shown non-significant $\delta$<sup>15</sup>N-size relationships: *X. copei* presents a strong dispersion of its values (CV = 6.57) contrary to the values of *N. kroyeri* which remain relatively stable with the size of its individuals (CV = 2.15)
 -   Do these differences translate into differences in their feeding strategies?
-
-### Linear relationships 
 ```{r}
 #| echo: true
 #| warning: false
@@ -274,7 +219,7 @@ htmltools::tagList(DT::datatable(data_sum))
 #| label: d15_size_species
 
 # Selection of species presenting significant d15N-size relationship
-ontogeny_significant <- filter(ontogeny_data,
+ontogeny_significant <- filter(isotope_data,
                                species %in% c("Lampanyctus crocodilus", "Aphanopus carbo",
                                               "Melanostigma atlanticum", "Serrivomer beanii",
                                               "Stomias boa", "Myctophum punctatum","Arctozenus risso"))
@@ -288,7 +233,8 @@ ontogeny_significant$species <- factor(ontogeny_significant$species,
                                           "Aphanopus carbo",
                                           "Arctozenus risso"))
 
-plot_significant <- ggplot(ontogeny_significant, aes(x=size, y=d15N_muscle_untreated))+
+# plot of significant relationships
+plot_significant <- ggplot(ontogeny_significant, aes(x=size, y=d15N))+
   geom_point (alpha=0.4, col="black") + 
   geom_smooth(method=lm, se=T, alpha=0.2, col= alpha("darkblue",0.7)) +
   facet_wrap(~species, scale="free_x", ncol=3)+ 
@@ -311,7 +257,7 @@ plot_significant <- ggplot(ontogeny_significant, aes(x=size, y=d15N_muscle_untre
         axis.text =  element_text(size=13))
 
 # Selection of species presenting non-significant d15N-size relationship
-ontogeny_non_significant <- filter(ontogeny_data,
+ontogeny_non_significant <- filter(isotope_data,
                                    species %in% c("Argyropelecus olfersii", "Lampanyctus macdonaldi",
                                                   "Searsia koefoedi", "Notoscopelus kroyeri",
                                                   "Xenodermichthys copei"))
@@ -328,13 +274,14 @@ ontogeny_non_significant$species <- factor(ontogeny_non_significant$species,
 cv <- function(x){
   (sd(x)/mean(x))*100
 }
-coeff_var <- aggregate(d15N_muscle_untreated ~ species, 
+coeff_var <- aggregate(d15N ~ species, 
                        data = ontogeny_non_significant,
                        FUN = cv)
-coeff_var$d15N_muscle_untreated <-round(coeff_var$d15N_muscle_untreated, digits = 2)
+coeff_var$d15N <-round(coeff_var$d15N, digits = 2)
 
 
-plot_non_significant <- ggplot(ontogeny_non_significant, aes(x=size, y=d15N_muscle_untreated))+
+# plot of non-significant relationships
+plot_non_significant <- ggplot(ontogeny_non_significant, aes(x=size, y=d15N))+
   geom_point (alpha=0.4, col="black") + 
   facet_wrap(~species, scale="free_x", ncol=3, nrow = 3)+ 
   ggpmisc::stat_poly_eq(formula = y ~ x, 
@@ -353,22 +300,22 @@ plot_non_significant <- ggplot(ontogeny_non_significant, aes(x=size, y=d15N_musc
         axis.title = element_text(size=14),
         plot.background = element_rect(colour = "white"),
         axis.text =  element_text(size=13))+
-  geom_text(coeff_var, mapping = aes(x = -Inf, y = -Inf, label = paste("CV = ", d15N_muscle_untreated, sep = "")),
+  geom_text(coeff_var, mapping = aes(x = -Inf, y = -Inf, label = paste("CV = ", d15N, sep = "")),
             hjust = -0.2, vjust = -0.8, size = 4)
 
 # Combine the two plot 
 ggpubr::ggarrange(plot_significant, plot_non_significant, ncol=1, labels = c("A", "B"),
                   heights = c(2, 1.25))
 
-#store the plot in the "figures" file in high resolution 
-ggsave("d15n_size_sp.png", path = "figures", dpi = 700, height = 13, width = 10)
+# store the plot in the "figures" file in high resolution 
+#ggsave("d15n_size_sp.png", path = "figures", dpi = 700, height = 13, width = 10)
 ```
 
 
 # 3. Variation partitionning
 
 -   At the species level, is it the sampling depth or the size of the individuals that most influences the values in $\delta$<sup>15</sup>N?
--  To test the significance of the influence of each variable (depth and size) on \(\delta\)$^{15}$N values an ANOVA-type permutation test was performed for each model (anova.cca function)
+-  To test the significance of the influence of each variable (depth and size) on $\delta$<sup>15</sup>N values an ANOVA-type permutation test was performed for each model (anova.cca function)
 -  Since the third fraction (depth and size) is not the result of an RDA, it cannot be tested for significance.
 
 ```{r}
@@ -376,9 +323,10 @@ ggsave("d15n_size_sp.png", path = "figures", dpi = 700, height = 13, width = 10)
 #| warning: false
 #| label: varpart
 
-# S. boa and A. carbo not considered in these analyses due to small depth range
-varpart_data <- ontogeny_data%>%
-  filter(!species%in%c("Stomias boa", "Aphanopus carbo"))
+# S. boa and A. carbo not considered in this analysis due to small depth range sampled
+varpart_data <- isotope_data%>%
+  filter(!species%in%c("Stomias boa", "Aphanopus carbo"))%>%
+  arrange(species)
 
 # List of species names
 species_list <- unique(varpart_data$species)
@@ -386,7 +334,7 @@ species_list <- unique(varpart_data$species)
 # Initialize an empty list to store the results
 result_list <- list()
 
-# Initialize an empty data frame to store indfract values (variance explained by each variable)
+# Initialize an empty data frame to store indfract values (variance of d15N values explained by depth and size)
 indfract_df <- data.frame(species = character(0), indfract = numeric(0), variable=character(0))
 
 # Loop through each species
@@ -397,7 +345,7 @@ for (species_name in species_list) {
     filter(species == species_name)
   
   # Perform variation partitioning analysis
-  species_part <- vegan::varpart(species_data$d15N_muscle_untreated,
+  species_part <- vegan::varpart(species_data$d15N,
                                  ~trawling_depth, ~size, data = species_data)
   
   # Create the specified plot for the current species
@@ -411,8 +359,8 @@ for (species_name in species_list) {
   title(main = paste("Variation Partitioning for", species_name))
   
   # Perform the significance testing
-  rda1 <- vegan::rda(species_data$d15N_muscle_untreated, species_data$trawling_depth, species_data$size)
-  rda2 <- vegan::rda(species_data$d15N_muscle_untreated, species_data$size, species_data$trawling_depth)
+  rda1 <- vegan::rda(species_data$d15N, species_data$trawling_depth, species_data$size)
+  rda2 <- vegan::rda(species_data$d15N, species_data$size, species_data$trawling_depth)
   anova1 <- vegan::anova.cca(rda1)
   anova2 <- vegan::anova.cca(rda2)
   
@@ -430,10 +378,10 @@ for (species_name in species_list) {
   
   # Print the significance testing results
   cat("ANOVA (Depth-Size):\n")
-  print(anova1)
+  print(broom::tidy(anova1))
   
   cat("ANOVA (Size-Depth):\n")
-  print(anova2)
+  print(broom::tidy(anova2))
   
   cat("\n")
 }
@@ -470,7 +418,7 @@ var_freq$variable <- factor(var_freq$variable,
                             levels=c("Residuals","Depth only","Depth and size","Size only"))
 
 
-# Stacked + percent
+# plot
 ggplot(var_freq , aes(fill=variable, y=freq, x=species)) + 
   geom_bar(position="stack", stat="identity", alpha=0.6, linewidth=0.5)+
   scale_fill_manual(values = c("#33505C","#861D31","#D8973C"))+
@@ -487,8 +435,8 @@ ggplot(var_freq , aes(fill=variable, y=freq, x=species)) +
   guides(fill=guide_legend(title="Explanatory variables"),
          color="none")
 
-#store the plot in the "figures" file in high resolution 
-ggsave("variations_coeff.png", path = "figures", dpi = 700, width = 8, height = 5)
+# store the plot in the "figures" file in high resolution 
+#ggsave("d15n_variability.png", path = "figures", dpi = 700, width = 8, height = 5)
 ```
 
 
@@ -501,10 +449,14 @@ ggsave("variations_coeff.png", path = "figures", dpi = 700, width = 8, height = 
 #| fig-width: 15
 #| label: temporal_variability
 
-ontogeny_data$years <- as.character(ontogeny_data$years)
-
+# color for each sampling years
 col_years <- c("#FFC75F", "#F3C5FF", "#845EC2", "#C34A36", "#3596B5", "grey")
-ggplot(ontogeny_data , aes(x=size, y=d15N_muscle_untreated))+
+
+# Years in discrete variable 
+isotope_data$years <- as.character(isotope_data$years)
+
+# plot
+ggplot(isotope_data , aes(x=size, y=d15N))+
   geom_point (alpha=0.9, aes(col=years), size=2.2) + 
   scale_color_manual(values = col_years)+
   facet_wrap(~species, scale="free_x", ncol=3)+ 
@@ -521,7 +473,7 @@ ggplot(ontogeny_data , aes(x=size, y=d15N_muscle_untreated))+
         plot.background = element_rect(fill = "white",colour = "white"))
 
 #store the plot in the "figures" file in high resolution 
-ggsave("years_sampling.png", path = "figures", dpi = 700, height = 10, width = 11)
+#ggsave("years_sampling.png", path = "figures", dpi = 700, height = 10, width = 11)
 ```
 
 ## Representativeness of sample sizes between the two data sets 
@@ -532,9 +484,9 @@ ggsave("years_sampling.png", path = "figures", dpi = 700, height = 10, width = 1
 #| fig-height: 10
 #| fig-width: 15
 #| label: data_set
-
-ontogeny_data_TL <- ontogeny_data%>%
-  # conversion standard length in total length (equations Tiphaine)
+  
+# conversion standard length in total length for the isotope dataset (equations by Tiphaine Chouvelon)
+isotope_data_TL <- isotope_data%>%
   mutate(total_length = case_when(species=="Aphanopus carbo" & size<85~size+3,
                                   species=="Aphanopus carbo" & size>85~size+5,
                                   species=="Arctozenus risso" ~size+1,
@@ -552,13 +504,15 @@ ontogeny_data_TL <- ontogeny_data%>%
   mutate(data_set="isotopic dataset")%>%
   rename("size"="total_length")
 
+# formatting the trawling data set 
 trawling_dataset_comparaison <- trawling_dataset%>%
   select(species, size)%>%
   mutate(data_set="trawling dataset")
 
 # merge the two data frame
-size_comparaison <- rbind(trawling_dataset_comparaison,ontogeny_data_TL)
+size_comparaison <- rbind(trawling_dataset_comparaison,isotope_data_TL)
 
+# plot
 ggplot(size_comparaison, aes(x=size)) +
   geom_density(alpha=0.3, linewidth=0.7, aes(col=data_set, fill= data_set))+
   scale_color_manual(values = c("#3596B5", "#B0A8B9"), labels = c("Isotopic dataset", "Trawling dataset"))+
@@ -575,8 +529,8 @@ ggplot(size_comparaison, aes(x=size)) +
   xlab("Standard length (cm)")+
   guides(fill=guide_legend(title="Dataset"), col=guide_legend(title="Dataset"))
 
-#store the plot in the "figures" file in high resolution 
-ggsave("dataset.png", path = "figures", dpi = 700, width = 12, height = 9)
+# store the plot in the "figures" file in high resolution 
+#ggsave("dataset_comparison.png", path = "figures", dpi = 700, width = 12, height = 9)
 ```
 
 ## Non-significant size-depth relationships at species level
@@ -594,6 +548,7 @@ trawling_dataset_ns <- filter(trawling_dataset, species %in% c("Arctozenus risso
                                                          "Serrivomer beanii","Argyropelecus olfersii",
                                                          "Stomias boa boa", "Aphanopus carbo"))
 
+# order species 
 trawling_dataset_ns$species <- factor(trawling_dataset_ns$species,
                             levels=c("Notoscopelus kroyeri", "Serrivomer beanii", 
                                      "Stomias boa boa","Argyropelecus olfersii",
@@ -604,12 +559,12 @@ trawling_dataset_ns$species <- factor(trawling_dataset_ns$species,
                                      "A. risso", "S. koefoedi",
                                      "A. carbo", "L.macdonaldi"))
 
-# Density plot 
+# Median depth  
 median_size_sp_ns <- trawling_dataset_ns%>%
   group_by(depth_layer, species)%>%
   summarise(median_size =median(size))
 
-
+# plot
 ggplot(trawling_dataset_ns, aes(x=size)) +
   geom_density(alpha=0.3, linewidth=0.8, adjust= 2, aes(fill= depth_layer, col= depth_layer))+
   scale_fill_manual(values = c("#93C3FF", "#6799D3","#3A72A8", "#002A58"))+
@@ -629,7 +584,7 @@ ggplot(trawling_dataset_ns, aes(x=size)) +
   geom_vline(data =median_size_sp_ns, aes(xintercept = median_size, color=depth_layer),
              linewidth=0.6, linetype="dashed")
 
-#store the plot in the "figures" file in high resolution 
-ggsave("depth_size_all.png", path = "figures", dpi = 700, width = 12, height = 9)
+# store the plot in the "figures" file in high resolution 
+#ggsave("depth_size_all_sp.png", path = "figures", dpi = 700, width = 12, height = 9)
 ```
 

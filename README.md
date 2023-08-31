@@ -28,8 +28,10 @@ Here is an overview of `ontogeny_deep_pelagic_fish` content:
 
 ## Workflow
 
-The script is divided into 3 main parts: - Linear relationships between
-size and depth (at community and specific levels)
+The script is divided into 3 main parts:
+
+- Linear relationships between size and depth (at community and specific
+  levels)
 
 - Linear relationships between $\delta$$^{15}$N values and individual
   size (at community and specific level)
