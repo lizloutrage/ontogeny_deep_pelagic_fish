@@ -3,7 +3,7 @@ title: "index"
 author: "Liz Loutrage"
 format: 
   html:
-    self-contained: false
+    self-contained: true
     code-fold: true
 editor: source
 theme: minty
@@ -40,7 +40,7 @@ isotopic_dataset <-
   rename(trawling_depth = `Trawling depth [m]`,
          size = `Standard length [cm] (individuals, mean)`,
          species = Taxa)%>%
-  # create d15N column, when d15N untreated unaivailable we take d15N cyclohexane-delipidated
+  # create d15N column, when d15N untreated unavailable we take d15N cyclohexane-delipidated
   mutate(d15N= coalesce(`δ15N (untreated)`,`δ15N (cyclohexane-delipidated)`))
 
 # Trawling data set ----
@@ -80,7 +80,16 @@ trawling_dataset <-
 median_size_data <- trawling_dataset %>%
   group_by(depth_layer) %>%
   summarise(median_size = median(size)) %>%
-  mutate(across(depth_layer, factor, levels = c("Epipelagic", "Upper mesopelagic", "Lower mesopelagic", "Bathypelagic")))
+  mutate(across(
+    depth_layer,
+    factor,
+    levels = c(
+      "Epipelagic",
+      "Upper mesopelagic",
+      "Lower mesopelagic",
+      "Bathypelagic"
+    )
+  ))
 
 # plot
 ggplot(trawling_dataset, aes(x = size)) +
@@ -112,7 +121,7 @@ ggplot(trawling_dataset, aes(x = size)) +
     linetype = "dashed")
 
 # store the plot in the "figures" file in high resolution
-#ggsave("density_plot_community.png", path = "figures", dpi = 700, height = 6, width = 6)
+ggsave("density_plot_community.png", path = "figures", dpi = 700, height = 6, width = 6)
 ```
 
 ### Linear relationship
@@ -129,6 +138,8 @@ htmltools::tagList(DT::datatable(lr_size_depth_community))
 
 ## Species level
 ### Linear relationships
+
+#### Regressions
 ```{r}
 #| echo: true
 #| label: size_depth_species_lm
@@ -185,85 +196,16 @@ ggplot(trawling_dataset_significant, aes(x=size)) +
              linewidth=0.6, linetype="dashed")
 
 # store the plot in the "figures" file in high resolution
-#ggsave("density_plot_species.png", path = "figures", dpi = 700, height = 7, width = 9)
+ggsave("density_plot_species.png", path = "figures", dpi = 700, height = 7, width = 9)
 ```
 
 # 2. $\delta$<sup>15</sup>N-size relationships
-## At community level
-```{r}
-#| echo: true
-#| label: d15n_size_community
 
-# Load isotope data
-#isotope_data <- utils::read.csv(here::here("data", "ontogeny_isotopy_data.csv"), sep = ";", header = T, dec = ",")
-
-# plot
-ggplot(isotopic_dataset , aes(x=size, y=d15N))+
-  geom_point (alpha=0.4, size=1) + 
-  geom_smooth(method=lm, se=T, alpha=0.2, col= alpha("darkblue",0.7)) + 
-  ggpmisc::stat_poly_eq(formula = y ~ x, 
-                        aes(label = paste(..eq.label.., ..rr.label.., ..p.value.label.. 
-                                          , ..n.label..,sep = "*`,`~")),
-                        parse = TRUE,
-                        size=4,
-                        label.x.npc = "right",
-                        label.y.npc = "bottom",
-                        vstep = -0.0005)+ 
-  scale_x_continuous(trans = 'log2') +
-  xlab("Standard length (cm)")+
-  ylab(expression({delta}^15*N~'\u2030'))+
-  ylim(c(7, 14))+
-  guides(fill="none")+
-  theme_minimal()+
-  theme(strip.text.x = element_text(size=12,face="italic"),
-        axis.title = element_text(size=12),
-        axis.text =  element_text(size=12),
-        plot.background = element_rect(colour = "white"))
-
-# store the plot in the "figures" file in high resolution 
-#ggsave("d15n_size_community.png", path = "figures", dpi = 700)
-```
-
-
-## At species level
-### Data summary
+__Latitude-depth influence on $\delta$<sup>15</sup>N values__
+- No significant influence of latitude on $\delta$<sup>15</sup>N values
 ```{r}
 #| echo: true
 #| warning: false
-#| label: range_size_sp 
-
-data_sum <- isotopic_dataset %>%
-  group_by(species) %>%
-  summarise(
-    range_size = max(size) - min(size),
-    min_size = min(size),
-    max_size = max(size),
-    mean_size = mean(size),
-    mean_d15n = mean(d15N),
-    range_depth = max(trawling_depth) - min(trawling_depth)) %>%
-  mutate(across(where(is.numeric), round, 2))
-
-htmltools::tagList(DT::datatable(data_sum))
-```
-
-
-### Latitude-depth influence on d15N values
-```{r}
-#| echo: true
-#| warning: false
-
-ggplot(isotopic_dataset, aes(x=LatitudeEvent, y=d15N))+
-  geom_point(aes(col=trawling_depth)) + 
-  geom_smooth(method=lm, se=T, alpha=0.2, col= alpha("grey",0.7)) + 
-  ggpmisc::stat_poly_eq(formula = y ~ x, 
-                        aes(label = paste(..eq.label.., ..rr.label.., ..p.value.label.. 
-                                          , ..n.label..,sep = "*`,`~")),
-                        parse = TRUE,
-                        size=4,
-                        label.x.npc = "right",
-                        label.y.npc = "bottom",
-                        vstep = -0.0005)+
-  theme_bw()
 
 isotopic_varpart <- isotopic_dataset%>%
   na.omit()
@@ -297,13 +239,65 @@ vegan::anova.cca(rda1)
 vegan::anova.cca(rda2)
 ```
 
+## At community level
+```{r}
+#| echo: true
+#| label: d15n_size_community
+
+# plot
+ggplot(isotopic_dataset , aes(x=size, y=d15N))+
+  geom_point (alpha=0.4, size=1) + 
+  geom_smooth(method=lm, se=T, alpha=0.2, col= alpha("darkblue",0.7)) + 
+  ggpmisc::stat_poly_eq(formula = y ~ x, 
+                        aes(label = paste(..eq.label.., ..rr.label.., ..p.value.label.. 
+                                          , ..n.label..,sep = "*`,`~")),
+                        parse = TRUE,
+                        size=4,
+                        label.x.npc = "right",
+                        label.y.npc = "bottom",
+                        vstep = -0.0005)+ 
+  scale_x_continuous(trans = 'log2') +
+  xlab("Standard length (cm)")+
+  ylab(expression({delta}^15*N~'\u2030'))+
+  ylim(c(7, 14))+
+  guides(fill="none")+
+  theme_minimal()+
+  theme(strip.text.x = element_text(size=12,face="italic"),
+        axis.title = element_text(size=12),
+        axis.text =  element_text(size=12),
+        plot.background = element_rect(colour = "white"))
+
+# store the plot in the "figures" file in high resolution 
+ggsave("d15n_size_community.png", path = "figures", dpi = 700)
+```
+
+## At species level
+### Data summary
+```{r}
+#| echo: true
+#| warning: false
+#| label: range_size_sp 
+
+data_sum <- isotopic_dataset %>%
+  group_by(species) %>%
+  summarise(
+    range_size = max(size) - min(size),
+    min_size = min(size),
+    max_size = max(size),
+    mean_size = mean(size),
+    mean_d15n = mean(d15N),
+    range_depth = max(trawling_depth) - min(trawling_depth)) %>%
+  mutate(across(where(is.numeric), round, 2))
+
+htmltools::tagList(DT::datatable(data_sum))
+```
 
 ### Linear relationships 
+#### Plot linear relationships 
 
 -  __A__: significant relationships 
 -  __B__: non-significant relationships 
--  __Coefficient of variation__: The dispersion of the $\delta$<sup>15</sup>N values is not the same between the species having shown non-significant $\delta$<sup>15</sup>N-size relationships: *X. copei* presents a strong dispersion of its values (CV = 6.57) contrary to the values of *N. kroyeri* which remain relatively stable with the size of its individuals (CV = 2.15)
--   Do these differences translate into differences in their feeding strategies?
+
 ```{r}
 #| echo: true
 #| warning: false
@@ -427,7 +421,42 @@ ggpubr::ggarrange(
 )
 
 # store the plot in the "figures" file in high resolution 
-#ggsave("d15n_size_sp.png", path = "figures", dpi = 700, height = 13, width = 10)
+ggsave("d15n_size_sp.png", path = "figures", dpi = 700, height = 13, width = 10)
+```
+#### Assumptions validation
+```{r}
+#| echo: true
+#| label: assumptions
+#| fig-width: 8
+#| fig-height: 8
+
+# Create an empty list to store diagnostic metrics
+diag_metrics_list <- list()
+
+species_list <- unique(ontogeny_significant$species)
+
+for (species_name in species_list){
+  species_data <- ontogeny_significant %>%
+    filter(species == species_name)
+  
+  # Fit the linear model
+  model <- lm(d15N ~ size, data = species_data)
+  
+  # Create diagnostic plots
+  par(mfrow = c(2, 2))
+  plot(model, main = paste("Diagnostic Plots for", species_name))
+  
+  # Get diagnostic metrics and store them in the list
+  model.diag.metrics <- broom::augment(model)
+  diag_metrics_list[[species_name]] <- model.diag.metrics %>%
+    top_n(3, wt = .cooksd)
+}
+
+```
+
+__Access diagnostic metrics__
+```{r}
+print(diag_metrics_list)
 ```
 
 
@@ -441,9 +470,15 @@ ggpubr::ggarrange(
 #| echo: true
 #| warning: false
 #| label: varpart
+#| fig-width: 8
+
 # S. boa and A. carbo not considered in this analysis due to small depth range sampled
 varpart_data <- isotopic_dataset %>%
   filter(!species %in% c("Stomias boa", "Aphanopus carbo")) %>%
+  # outliers to remove 
+  # filter(!c(species == "Melanostigma atlanticum" & d15N == 9.85)) %>%
+  # filter(!c(species == "Stomias boa" & d15N == 9.47)) %>%
+  # filter(!c(species == "Argyropelecus olfersii" & d15N == 8.15))
   arrange(species)
 
 # List of species names
@@ -460,6 +495,7 @@ indfract_df <-
 
 # Loop through each species
 for (species_name in species_list) {
+  par(mfrow=c(1,1))
   
   # Filter the data for the current species
   species_data <- varpart_data %>%
@@ -476,7 +512,7 @@ for (species_name in species_list) {
     bg = c("#072AC8", "#0B5345"),
     alpha = 100,
     digits = 2,
-    cex = 1.4
+    cex = 1.3
   )
   
   # Add a title to the plot
@@ -492,9 +528,10 @@ for (species_name in species_list) {
   anova1 <- vegan::anova.cca(rda1)
   anova2 <- vegan::anova.cca(rda2)
   
-  # Check homogeneity of variances with Fligner-Killeen test
-  fligner_test <- fligner.test(d15N ~ trawling_depth, data = species_data)
-
+  # Check homogeneity of variances with residual plot
+  model <- lm(d15N ~ trawling_depth + size, data = species_data)
+  residuals <- residuals(model)
+  
   # Store the results, and the significance testing in the list
   result_list[[species_name]] <-
     list(
@@ -502,7 +539,7 @@ for (species_name in species_list) {
       varpart_plot = plot,
       anova_depth_size = anova1,
       anova_size_depth = anova2,
-      fligner_test = fligner_test
+      residuals = residuals
     )
   
   # Extract and store the indfract value (variance explained by each variable) in the data frame
@@ -524,12 +561,11 @@ for (species_name in species_list) {
   cat("ANOVA (Size-Depth):\n")
   print(broom::tidy(anova2))
   
-  # Print Fligner-Killeen test results
-  cat("Fligner-Killeen Test:\n")
-  print(fligner_test)
-  
+  # Plot residual vs fitted 
+  par(mfrow = c(1, 2))    
   cat("\n")
-} 
+  plot(model)
+}
 
 ```
 
@@ -586,10 +622,8 @@ ggplot(var_freq , aes(fill=variable, y=freq, x=species)) +
          color="none")
 
 # store the plot in the "figures" file in high resolution 
-#ggsave("d15n_variability.png", path = "figures", dpi = 700, width = 8, height = 5)
+ggsave("d15n_variability.png", path = "figures", dpi = 700, width = 8, height = 5)
 ```
-
-
 # 4. Appendices
 
 ## Representativeness of sample sizes between the two data sets 
@@ -597,8 +631,8 @@ ggplot(var_freq , aes(fill=variable, y=freq, x=species)) +
 ```{r}
 #| echo: true
 #| warning: false 
-#| fig-height: 10
-#| fig-width: 15
+#| fig-height: 9
+#| fig-width: 10
 #| label: data_set
   
 # conversion standard length in total length for the isotope dataset (equations by Tiphaine Chouvelon)
@@ -661,7 +695,7 @@ ggsave("Appendix_1.png", path = "figures", dpi = 200, width = 9, height = 8)
 #| echo: true
 #| warning: false 
 #| fig-height: 10
-#| fig-width: 15
+#| fig-width: 10
 #| label: temporal_variability
 
 # color for each sampling Years

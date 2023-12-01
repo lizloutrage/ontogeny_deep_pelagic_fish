@@ -3,7 +3,7 @@ title: "index"
 author: "Liz Loutrage"
 format: 
   html:
-    self-contained: false
+    self-contained: true
     code-fold: true
 editor: source
 theme: minty
@@ -40,7 +40,7 @@ isotopic_dataset <-
   rename(trawling_depth = `Trawling depth [m]`,
          size = `Standard length [cm] (individuals, mean)`,
          species = Taxa)%>%
-  # create d15N column, when d15N untreated unaivailable we take d15N cyclohexane-delipidated
+  # create d15N column, when d15N untreated unavailable we take d15N cyclohexane-delipidated
   mutate(d15N= coalesce(`δ15N (untreated)`,`δ15N (cyclohexane-delipidated)`))
 
 # Trawling data set ----
@@ -69,36 +69,6 @@ trawling_dataset <-
 
 # 1. Relationships between size and depth
 
-
-::: {.cell}
-
-```{.r .cell-code}
-trawling_dataset$species = with(trawling_dataset, reorder(species, trawling_depth, min))  
-
-
-ggplot(trawling_dataset,
-       aes(x = trawling_depth, y = species, group = species))+ 
-  ggridges::stat_density_ridges(quantile_lines = TRUE, quantiles = 0.5 , alpha=0.4, size=0.7,
-                                scale=1.2, col= "darkgrey")+
-  theme_bw()+
-  scale_y_discrete(position = "left")+
-  scale_x_reverse(limits = c(2000,0))+
-  coord_flip()+
-  ylab(label = "")+ xlab("Depth (m)")+
-  theme(axis.text.y = element_text(size=13),
-        axis.text.x = element_text(face="italic", size=12, angle=80, vjust = 0.5, hjust=0.5),
-        axis.title.x = element_text(size=13),
-        axis.title.y = element_text(size=13))+
-  guides(fill="none", col="none", alpha="none")
-```
-
-::: {.cell-output-display}
-![](index_files/figure-html/depth_distribution_sp-1.png){width=960}
-:::
-:::
-
-
-
 ## Community level
 - Bigger fish at depth? 
 
@@ -109,7 +79,16 @@ ggplot(trawling_dataset,
 median_size_data <- trawling_dataset %>%
   group_by(depth_layer) %>%
   summarise(median_size = median(size)) %>%
-  mutate(across(depth_layer, factor, levels = c("Epipelagic", "Upper mesopelagic", "Lower mesopelagic", "Bathypelagic")))
+  mutate(across(
+    depth_layer,
+    factor,
+    levels = c(
+      "Epipelagic",
+      "Upper mesopelagic",
+      "Lower mesopelagic",
+      "Bathypelagic"
+    )
+  ))
 
 # plot
 ggplot(trawling_dataset, aes(x = size)) +
@@ -147,7 +126,7 @@ ggplot(trawling_dataset, aes(x = size)) +
 
 ```{.r .cell-code}
 # store the plot in the "figures" file in high resolution
-#ggsave("density_plot_community.png", path = "figures", dpi = 700, height = 6, width = 6)
+ggsave("density_plot_community.png", path = "figures", dpi = 700, height = 6, width = 6)
 ```
 :::
 
@@ -167,8 +146,8 @@ htmltools::tagList(DT::datatable(lr_size_depth_community))
 ::: {.cell-output-display}
 
 ```{=html}
-<div class="datatables html-widget html-fill-item-overflow-hidden html-fill-item" id="htmlwidget-8f01f68e4957be5989fd" style="width:100%;height:auto;"></div>
-<script type="application/json" data-for="htmlwidget-8f01f68e4957be5989fd">{"x":{"filter":"none","vertical":false,"data":[["1","2"],["(Intercept)","trawling_depth"],[8.91,0],[0.4,0],[22.4,7.34],[0,0]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>term<\/th>\n      <th>estimate<\/th>\n      <th>std.error<\/th>\n      <th>statistic<\/th>\n      <th>p.value<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"className":"dt-right","targets":[2,3,4,5]},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
+<div class="datatables html-widget html-fill-item" id="htmlwidget-c08d68c6079c56ebe944" style="width:100%;height:auto;"></div>
+<script type="application/json" data-for="htmlwidget-c08d68c6079c56ebe944">{"x":{"filter":"none","vertical":false,"data":[["1","2"],["(Intercept)","trawling_depth"],[8.91,0],[0.4,0],[22.4,7.34],[0,0]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>term<\/th>\n      <th>estimate<\/th>\n      <th>std.error<\/th>\n      <th>statistic<\/th>\n      <th>p.value<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"className":"dt-right","targets":[2,3,4,5]},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
 ```
 
 :::
@@ -177,6 +156,8 @@ htmltools::tagList(DT::datatable(lr_size_depth_community))
 
 ## Species level
 ### Linear relationships
+
+#### Regressions
 
 ::: {.cell}
 
@@ -192,8 +173,8 @@ htmltools::tagList(DT::datatable(lr_size_depth_sp))
 ::: {.cell-output-display}
 
 ```{=html}
-<div class="datatables html-widget html-fill-item-overflow-hidden html-fill-item" id="htmlwidget-747401b0dd306176502a" style="width:100%;height:auto;"></div>
-<script type="application/json" data-for="htmlwidget-747401b0dd306176502a">{"x":{"filter":"none","vertical":false,"data":[["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24"],["Myctophum punctatum","Myctophum punctatum","Notoscopelus kroyeri","Notoscopelus kroyeri","Arctozenus risso","Arctozenus risso","Argyropelecus olfersii","Argyropelecus olfersii","Lampanyctus crocodilus","Lampanyctus crocodilus","Stomias boa","Stomias boa","Xenodermichthys copei","Xenodermichthys copei","Serrivomer beanii","Serrivomer beanii","Melanostigma atlanticum","Melanostigma atlanticum","Aphanopus carbo","Aphanopus carbo","Searsia koefoedi","Searsia koefoedi","Lampanyctus macdonaldi","Lampanyctus macdonaldi"],["(Intercept)","trawling_depth","(Intercept)","trawling_depth","(Intercept)","trawling_depth","(Intercept)","trawling_depth","(Intercept)","trawling_depth","(Intercept)","trawling_depth","(Intercept)","trawling_depth","(Intercept)","trawling_depth","(Intercept)","trawling_depth","(Intercept)","trawling_depth","(Intercept)","trawling_depth","(Intercept)","trawling_depth"],[7.06,-0,7.52,-0,17.54,-0,6.7,0,9.6,0,25.09,0,9.09,0,53.92,0,3.55,0,75.64,0.01,12.22,0,14.12,0],[0.14,0,0.2,0,0.5,0,0.29,0,0.19,0,1.99,0,0.32,0,3.52,0,0.87,0,8.32,0.01,1.25,0,0.5600000000000001,0],[50.63,-2.06,38.29,-0.11,34.75,-1.21,22.99,0.38,50.14,7.92,12.58,0.08,28.86,3.36,15.33,0.17,4.09,5.21,9.09,1.53,9.800000000000001,0.17,25.12,0.52],[0,0.04,0,0.91,0,0.23,0,0.71,0,0,0,0.9399999999999999,0,0,0,0.87,0,0,0,0.14,0,0.86,0,0.61]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>species<\/th>\n      <th>term<\/th>\n      <th>estimate<\/th>\n      <th>std.error<\/th>\n      <th>statistic<\/th>\n      <th>p.value<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"className":"dt-right","targets":[3,4,5,6]},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
+<div class="datatables html-widget html-fill-item" id="htmlwidget-75b8e3d2945d829d6def" style="width:100%;height:auto;"></div>
+<script type="application/json" data-for="htmlwidget-75b8e3d2945d829d6def">{"x":{"filter":"none","vertical":false,"data":[["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24"],["Aphanopus carbo","Aphanopus carbo","Arctozenus risso","Arctozenus risso","Argyropelecus olfersii","Argyropelecus olfersii","Lampanyctus crocodilus","Lampanyctus crocodilus","Lampanyctus macdonaldi","Lampanyctus macdonaldi","Melanostigma atlanticum","Melanostigma atlanticum","Myctophum punctatum","Myctophum punctatum","Notoscopelus kroyeri","Notoscopelus kroyeri","Searsia koefoedi","Searsia koefoedi","Serrivomer beanii","Serrivomer beanii","Stomias boa","Stomias boa","Xenodermichthys copei","Xenodermichthys copei"],["(Intercept)","trawling_depth","(Intercept)","trawling_depth","(Intercept)","trawling_depth","(Intercept)","trawling_depth","(Intercept)","trawling_depth","(Intercept)","trawling_depth","(Intercept)","trawling_depth","(Intercept)","trawling_depth","(Intercept)","trawling_depth","(Intercept)","trawling_depth","(Intercept)","trawling_depth","(Intercept)","trawling_depth"],[75.64,0.01,17.54,-0,6.7,0,9.6,0,14.12,0,3.55,0,7.06,-0,7.52,-0,12.22,0,53.92,0,25.09,0,9.09,0],[8.32,0.01,0.5,0,0.29,0,0.19,0,0.5600000000000001,0,0.87,0,0.14,0,0.2,0,1.25,0,3.52,0,1.99,0,0.32,0],[9.09,1.53,34.75,-1.21,22.99,0.38,50.14,7.92,25.12,0.52,4.09,5.21,50.63,-2.06,38.29,-0.11,9.800000000000001,0.17,15.33,0.17,12.58,0.08,28.86,3.36],[0,0.14,0,0.23,0,0.71,0,0,0,0.61,0,0,0,0.04,0,0.91,0,0.86,0,0.87,0,0.9399999999999999,0,0]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>species<\/th>\n      <th>term<\/th>\n      <th>estimate<\/th>\n      <th>std.error<\/th>\n      <th>statistic<\/th>\n      <th>p.value<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"className":"dt-right","targets":[3,4,5,6]},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
 ```
 
 :::
@@ -248,21 +229,93 @@ ggplot(trawling_dataset_significant, aes(x=size)) +
 
 ```{.r .cell-code}
 # store the plot in the "figures" file in high resolution
-#ggsave("density_plot_species.png", path = "figures", dpi = 700, height = 7, width = 9)
+ggsave("density_plot_species.png", path = "figures", dpi = 700, height = 7, width = 9)
 ```
 :::
 
 
-
 # 2. $\delta$<sup>15</sup>N-size relationships
+
+__Latitude-depth influence on $\delta$<sup>15</sup>N values__
+- No significant influence of latitude on $\delta$<sup>15</sup>N values
+
+::: {.cell}
+
+```{.r .cell-code}
+isotopic_varpart <- isotopic_dataset%>%
+  na.omit()
+
+# Perform variation partitioning analysis
+part <- vegan::varpart(isotopic_varpart$d15N,
+                               ~ trawling_depth, ~ LatitudeEvent, data = isotopic_varpart)
+
+# Create the specified plot for the current species
+plot(
+  part,
+  Xnames = c("Depth", "Latitude"),
+  # name the partitions
+  bg = c("#072AC8", "#0B5345"),
+  alpha = 100,
+  # colour the circles
+  digits = 2,
+  # only show 2 digits
+  cex = 1.4
+)
+```
+
+::: {.cell-output-display}
+![](index_files/figure-html/unnamed-chunk-6-1.png){width=672}
+:::
+
+```{.r .cell-code}
+rda1 <- vegan::rda(isotopic_varpart$d15N,
+                   isotopic_varpart$trawling_depth,
+                   isotopic_varpart$LatitudeEvent)
+
+rda2 <- vegan::rda(isotopic_varpart$d15N,
+                   isotopic_varpart$LatitudeEvent,
+                   isotopic_varpart$trawling_depth)
+
+vegan::anova.cca(rda1)
+```
+
+::: {.cell-output .cell-output-stdout}
+```
+Permutation test for rda under reduced model
+Permutation: free
+Number of permutations: 999
+
+Model: rda(X = isotopic_varpart$d15N, Y = isotopic_varpart$trawling_depth, Z = isotopic_varpart$LatitudeEvent)
+          Df Variance      F Pr(>F)
+Model      1  0.01003 2.7091  0.122
+Residual 172  0.63668              
+```
+:::
+
+```{.r .cell-code}
+vegan::anova.cca(rda2)
+```
+
+::: {.cell-output .cell-output-stdout}
+```
+Permutation test for rda under reduced model
+Permutation: free
+Number of permutations: 999
+
+Model: rda(X = isotopic_varpart$d15N, Y = isotopic_varpart$LatitudeEvent, Z = isotopic_varpart$trawling_depth)
+          Df Variance      F Pr(>F)
+Model      1  0.00097 0.2614  0.619
+Residual 172  0.63668              
+```
+:::
+:::
+
+
 ## At community level
 
 ::: {.cell}
 
 ```{.r .cell-code}
-# Load isotope data
-#isotope_data <- utils::read.csv(here::here("data", "ontogeny_isotopy_data.csv"), sep = ";", header = T, dec = ",")
-
 # plot
 ggplot(isotopic_dataset , aes(x=size, y=d15N))+
   geom_point (alpha=0.4, size=1) + 
@@ -293,10 +346,9 @@ ggplot(isotopic_dataset , aes(x=size, y=d15N))+
 
 ```{.r .cell-code}
 # store the plot in the "figures" file in high resolution 
-#ggsave("d15n_size_community.png", path = "figures", dpi = 700)
+ggsave("d15n_size_community.png", path = "figures", dpi = 700)
 ```
 :::
-
 
 
 ## At species level
@@ -322,115 +374,20 @@ htmltools::tagList(DT::datatable(data_sum))
 ::: {.cell-output-display}
 
 ```{=html}
-<div class="datatables html-widget html-fill-item-overflow-hidden html-fill-item" id="htmlwidget-9c00851c46601bfdddc5" style="width:100%;height:auto;"></div>
-<script type="application/json" data-for="htmlwidget-9c00851c46601bfdddc5">{"x":{"filter":"none","vertical":false,"data":[["1","2","3","4","5","6","7","8","9","10","11","12"],["Aphanopus carbo","Arctozenus risso","Argyropelecus olfersii","Lampanyctus crocodilus","Lampanyctus macdonaldi","Melanostigma atlanticum","Myctophum punctatum","Notoscopelus kroyeri","Searsia koefoedi","Serrivomer beanii","Stomias boa","Xenodermichthys copei"],[37,9.5,6.7,8.300000000000001,3.3,4,4,8.1,6,45,21.8,13.9],[59,11,3.3,6.5,11.5,7,5,3.6,8.5,26.7,11.8,5.6],[96,20.5,10,14.8,14.8,11,9,11.7,14.5,71.7,33.6,19.5],[77.33,16.48,6.3,10.95,13.13,9.65,6.73,7.86,11.69,55.36,23.8,11.78],[12.36,10.53,10.18,10.46,11.54,11.21,9.99,11.18,11.8,9.49,11.61,9.83],[30,409,963,1229,666,278,1309,755,247,618,100,963]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>species<\/th>\n      <th>range_size<\/th>\n      <th>min_size<\/th>\n      <th>max_size<\/th>\n      <th>mean_size<\/th>\n      <th>mean_d15n<\/th>\n      <th>range_depth<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"className":"dt-right","targets":[2,3,4,5,6,7]},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
+<div class="datatables html-widget html-fill-item" id="htmlwidget-f0f95d047eb0fe25e50b" style="width:100%;height:auto;"></div>
+<script type="application/json" data-for="htmlwidget-f0f95d047eb0fe25e50b">{"x":{"filter":"none","vertical":false,"data":[["1","2","3","4","5","6","7","8","9","10","11","12"],["Aphanopus carbo","Arctozenus risso","Argyropelecus olfersii","Lampanyctus crocodilus","Lampanyctus macdonaldi","Melanostigma atlanticum","Myctophum punctatum","Notoscopelus kroyeri","Searsia koefoedi","Serrivomer beanii","Stomias boa","Xenodermichthys copei"],[37,9.5,6.7,8.300000000000001,3.3,4,4,8.1,6,45,21.8,13.9],[59,11,3.3,6.5,11.5,7,5,3.6,8.5,26.7,11.8,5.6],[96,20.5,10,14.8,14.8,11,9,11.7,14.5,71.7,33.6,19.5],[77.33,16.48,6.3,10.95,13.13,9.65,6.73,7.86,11.69,55.36,23.8,11.78],[12.36,10.53,10.18,10.46,11.54,11.21,9.99,11.18,11.8,9.49,11.61,9.83],[30,409,963,1229,666,278,1309,755,247,618,100,963]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>species<\/th>\n      <th>range_size<\/th>\n      <th>min_size<\/th>\n      <th>max_size<\/th>\n      <th>mean_size<\/th>\n      <th>mean_d15n<\/th>\n      <th>range_depth<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"className":"dt-right","targets":[2,3,4,5,6,7]},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
 ```
 
 :::
 :::
-
-
-
-### Latitude-depth influence on d15N values
-
-::: {.cell}
-
-```{.r .cell-code}
-ggplot(isotopic_dataset, aes(x=LatitudeEvent, y=d15N))+
-  geom_point(aes(col=trawling_depth)) + 
-  geom_smooth(method=lm, se=T, alpha=0.2, col= alpha("grey",0.7)) + 
-  ggpmisc::stat_poly_eq(formula = y ~ x, 
-                        aes(label = paste(..eq.label.., ..rr.label.., ..p.value.label.. 
-                                          , ..n.label..,sep = "*`,`~")),
-                        parse = TRUE,
-                        size=4,
-                        label.x.npc = "right",
-                        label.y.npc = "bottom",
-                        vstep = -0.0005)+
-  theme_bw()
-```
-
-::: {.cell-output-display}
-![](index_files/figure-html/unnamed-chunk-9-1.png){width=672}
-:::
-
-```{.r .cell-code}
-isotopic_varpart <- isotopic_dataset%>%
-  na.omit()
-
-# Perform variation partitioning analysis
-part <- vegan::varpart(isotopic_varpart$d15N,
-                               ~ trawling_depth, ~ LatitudeEvent, data = isotopic_varpart)
-
-# Create the specified plot for the current species
-plot(
-  part,
-  Xnames = c("Depth", "Latitude"),
-  # name the partitions
-  bg = c("#072AC8", "#0B5345"),
-  alpha = 100,
-  # colour the circles
-  digits = 2,
-  # only show 2 digits
-  cex = 1.4
-)
-```
-
-::: {.cell-output-display}
-![](index_files/figure-html/unnamed-chunk-9-2.png){width=672}
-:::
-
-```{.r .cell-code}
-rda1 <- vegan::rda(isotopic_varpart$d15N,
-                   isotopic_varpart$trawling_depth,
-                   isotopic_varpart$LatitudeEvent)
-
-rda2 <- vegan::rda(isotopic_varpart$d15N,
-                   isotopic_varpart$LatitudeEvent,
-                   isotopic_varpart$trawling_depth)
-
-vegan::anova.cca(rda1)
-```
-
-::: {.cell-output .cell-output-stdout}
-```
-Permutation test for rda under reduced model
-Permutation: free
-Number of permutations: 999
-
-Model: rda(X = isotopic_varpart$d15N, Y = isotopic_varpart$trawling_depth, Z = isotopic_varpart$LatitudeEvent)
-          Df Variance      F Pr(>F)
-Model      1  0.01003 2.7091  0.107
-Residual 172  0.63668              
-```
-:::
-
-```{.r .cell-code}
-vegan::anova.cca(rda2)
-```
-
-::: {.cell-output .cell-output-stdout}
-```
-Permutation test for rda under reduced model
-Permutation: free
-Number of permutations: 999
-
-Model: rda(X = isotopic_varpart$d15N, Y = isotopic_varpart$LatitudeEvent, Z = isotopic_varpart$trawling_depth)
-          Df Variance      F Pr(>F)
-Model      1  0.00097 0.2614  0.604
-Residual 172  0.63668              
-```
-:::
-:::
-
 
 
 ### Linear relationships 
+#### Plot linear relationships 
 
 -  __A__: significant relationships 
 -  __B__: non-significant relationships 
--  __Coefficient of variation__: The dispersion of the $\delta$<sup>15</sup>N values is not the same between the species having shown non-significant $\delta$<sup>15</sup>N-size relationships: *X. copei* presents a strong dispersion of its values (CV = 6.57) contrary to the values of *N. kroyeri* which remain relatively stable with the size of its individuals (CV = 2.15)
--   Do these differences translate into differences in their feeding strategies?
+
 
 ::: {.cell}
 
@@ -557,8 +514,135 @@ ggpubr::ggarrange(
 
 ```{.r .cell-code}
 # store the plot in the "figures" file in high resolution 
-#ggsave("d15n_size_sp.png", path = "figures", dpi = 700, height = 13, width = 10)
+ggsave("d15n_size_sp.png", path = "figures", dpi = 700, height = 13, width = 10)
 ```
+:::
+
+#### Assumptions validation
+
+::: {.cell}
+
+```{.r .cell-code}
+# Create an empty list to store diagnostic metrics
+diag_metrics_list <- list()
+
+species_list <- unique(ontogeny_significant$species)
+
+for (species_name in species_list){
+  species_data <- ontogeny_significant %>%
+    filter(species == species_name)
+  
+  # Fit the linear model
+  model <- lm(d15N ~ size, data = species_data)
+  
+  # Create diagnostic plots
+  par(mfrow = c(2, 2))
+  plot(model, main = paste("Diagnostic Plots for", species_name))
+  
+  # Get diagnostic metrics and store them in the list
+  model.diag.metrics <- broom::augment(model)
+  diag_metrics_list[[species_name]] <- model.diag.metrics %>%
+    top_n(3, wt = .cooksd)
+}
+```
+
+::: {.cell-output-display}
+![](index_files/figure-html/assumptions-1.png){width=768}
+:::
+
+::: {.cell-output-display}
+![](index_files/figure-html/assumptions-2.png){width=768}
+:::
+
+::: {.cell-output-display}
+![](index_files/figure-html/assumptions-3.png){width=768}
+:::
+
+::: {.cell-output-display}
+![](index_files/figure-html/assumptions-4.png){width=768}
+:::
+
+::: {.cell-output-display}
+![](index_files/figure-html/assumptions-5.png){width=768}
+:::
+
+::: {.cell-output-display}
+![](index_files/figure-html/assumptions-6.png){width=768}
+:::
+
+::: {.cell-output-display}
+![](index_files/figure-html/assumptions-7.png){width=768}
+:::
+:::
+
+
+__Access diagnostic metrics__
+
+::: {.cell}
+
+```{.r .cell-code}
+print(diag_metrics_list)
+```
+
+::: {.cell-output .cell-output-stdout}
+```
+$`Lampanyctus crocodilus`
+# A tibble: 3 × 8
+   d15N  size .fitted .resid   .hat .sigma .cooksd .std.resid
+  <dbl> <dbl>   <dbl>  <dbl>  <dbl>  <dbl>   <dbl>      <dbl>
+1  8.75   7.8    9.82 -1.07  0.0266  0.537  0.0547      -2.00
+2 10.7    7.6    9.78  0.959 0.0291  0.538  0.0482       1.79
+3 10.1   14.8   11.2  -1.14  0.0362  0.536  0.0865      -2.15
+
+$`Arctozenus risso`
+# A tibble: 3 × 8
+   d15N  size .fitted .resid   .hat .sigma .cooksd .std.resid
+  <dbl> <dbl>   <dbl>  <dbl>  <dbl>  <dbl>   <dbl>      <dbl>
+1  9.22  17.5    10.5 -1.27  0.0147  0.312   0.104      -3.73
+2 11.5   11.5    10.7  0.764 0.0582  0.333   0.163       2.30
+3 11.6   11.5    10.7  0.884 0.0582  0.329   0.218       2.66
+
+$`Myctophum punctatum`
+# A tibble: 3 × 8
+   d15N  size .fitted .resid   .hat .sigma .cooksd .std.resid
+  <dbl> <dbl>   <dbl>  <dbl>  <dbl>  <dbl>   <dbl>      <dbl>
+1  9.29     8   10.4  -1.13  0.0497  0.436  0.171       -2.56
+2 11.4      8   10.4   1.03  0.0497  0.439  0.143        2.34
+3 10.0      5    9.40  0.619 0.0818  0.450  0.0909       1.43
+
+$`Aphanopus carbo`
+# A tibble: 3 × 8
+   d15N  size .fitted .resid  .hat .sigma .cooksd .std.resid
+  <dbl> <dbl>   <dbl>  <dbl> <dbl>  <dbl>   <dbl>      <dbl>
+1  12.2    59    12.0  0.199 0.315  0.195   0.326       1.19
+2  12.8    86    12.5  0.305 0.157  0.170   0.252       1.65
+3  12.4    88    12.6 -0.213 0.180  0.196   0.149      -1.17
+
+$`Serrivomer beanii`
+# A tibble: 3 × 8
+   d15N  size .fitted .resid   .hat .sigma .cooksd .std.resid
+  <dbl> <dbl>   <dbl>  <dbl>  <dbl>  <dbl>   <dbl>      <dbl>
+1  9.23  26.7    8.93  0.295 0.269   0.505  0.0877      0.690
+2 10.6   54.5    9.48  1.11  0.0325  0.462  0.0858      2.26 
+3 10.2   46.8    9.33  0.834 0.0534  0.483  0.0826      1.71 
+
+$`Stomias boa`
+# A tibble: 3 × 8
+   d15N  size .fitted .resid  .hat .sigma .cooksd .std.resid
+  <dbl> <dbl>   <dbl>  <dbl> <dbl>  <dbl>   <dbl>      <dbl>
+1 11.7   30.7    12.2 -0.504 0.105  0.373   0.112      -1.39
+2  9.47  11.8    10.5 -1.07  0.215  0.266   1.35       -3.13
+3 11.6   16.9    11.0  0.658 0.105  0.357   0.192       1.81
+
+$`Melanostigma atlanticum`
+# A tibble: 3 × 8
+   d15N  size .fitted .resid  .hat .sigma .cooksd .std.resid
+  <dbl> <dbl>   <dbl>  <dbl> <dbl>  <dbl>   <dbl>      <dbl>
+1  9.85   7      10.6 -0.711 0.373  0.421   1.18       -1.99
+2 11.3    8      10.8  0.474 0.169  0.448   0.135       1.15
+3 12.2   10.9    11.5  0.666 0.112  0.437   0.155       1.57
+```
+:::
 :::
 
 
@@ -576,6 +660,10 @@ ggpubr::ggarrange(
 # S. boa and A. carbo not considered in this analysis due to small depth range sampled
 varpart_data <- isotopic_dataset %>%
   filter(!species %in% c("Stomias boa", "Aphanopus carbo")) %>%
+  # outliers to remove 
+  # filter(!c(species == "Melanostigma atlanticum" & d15N == 9.85)) %>%
+  # filter(!c(species == "Stomias boa" & d15N == 9.47)) %>%
+  # filter(!c(species == "Argyropelecus olfersii" & d15N == 8.15))
   arrange(species)
 
 # List of species names
@@ -592,6 +680,7 @@ indfract_df <-
 
 # Loop through each species
 for (species_name in species_list) {
+  par(mfrow=c(1,1))
   
   # Filter the data for the current species
   species_data <- varpart_data %>%
@@ -608,7 +697,7 @@ for (species_name in species_list) {
     bg = c("#072AC8", "#0B5345"),
     alpha = 100,
     digits = 2,
-    cex = 1.4
+    cex = 1.3
   )
   
   # Add a title to the plot
@@ -624,9 +713,10 @@ for (species_name in species_list) {
   anova1 <- vegan::anova.cca(rda1)
   anova2 <- vegan::anova.cca(rda2)
   
-  # Check homogeneity of variances with Fligner-Killeen test
-  fligner_test <- fligner.test(d15N ~ trawling_depth, data = species_data)
-
+  # Check homogeneity of variances with residual plot
+  model <- lm(d15N ~ trawling_depth + size, data = species_data)
+  residuals <- residuals(model)
+  
   # Store the results, and the significance testing in the list
   result_list[[species_name]] <-
     list(
@@ -634,7 +724,7 @@ for (species_name in species_list) {
       varpart_plot = plot,
       anova_depth_size = anova1,
       anova_size_depth = anova2,
-      fligner_test = fligner_test
+      residuals = residuals
     )
   
   # Extract and store the indfract value (variance explained by each variable) in the data frame
@@ -656,16 +746,15 @@ for (species_name in species_list) {
   cat("ANOVA (Size-Depth):\n")
   print(broom::tidy(anova2))
   
-  # Print Fligner-Killeen test results
-  cat("Fligner-Killeen Test:\n")
-  print(fligner_test)
-  
+  # Plot residual vs fitted 
+  par(mfrow = c(1, 2))    
   cat("\n")
-} 
+  plot(model)
+}
 ```
 
 ::: {.cell-output-display}
-![](index_files/figure-html/varpart-1.png){width=672}
+![](index_files/figure-html/varpart-1.png){width=768}
 :::
 
 ::: {.cell-output .cell-output-stdout}
@@ -674,25 +763,27 @@ ANOVA (Depth-Size):
 # A tibble: 2 × 5
   term        df Variance statistic p.value
   <chr>    <dbl>    <dbl>     <dbl>   <dbl>
-1 Model        1  0.00218      1.43   0.215
+1 Model        1  0.00218      1.43   0.241
 2 Residual    75  0.114       NA     NA    
 ANOVA (Size-Depth):
 # A tibble: 2 × 5
   term        df Variance statistic p.value
   <chr>    <dbl>    <dbl>     <dbl>   <dbl>
-1 Model        1  0.00878      5.78    0.02
-2 Residual    75  0.114       NA      NA   
-Fligner-Killeen Test:
-
-	Fligner-Killeen test of homogeneity of variances
-
-data:  d15N by trawling_depth
-Fligner-Killeen:med chi-squared = 7.5329, df = 8, p-value = 0.4804
+1 Model        1  0.00878      5.78   0.011
+2 Residual    75  0.114       NA     NA    
 ```
 :::
 
 ::: {.cell-output-display}
-![](index_files/figure-html/varpart-2.png){width=672}
+![](index_files/figure-html/varpart-2.png){width=768}
+:::
+
+::: {.cell-output-display}
+![](index_files/figure-html/varpart-3.png){width=768}
+:::
+
+::: {.cell-output-display}
+![](index_files/figure-html/varpart-4.png){width=768}
 :::
 
 ::: {.cell-output .cell-output-stdout}
@@ -701,25 +792,27 @@ ANOVA (Depth-Size):
 # A tibble: 2 × 5
   term        df Variance statistic p.value
   <chr>    <dbl>    <dbl>     <dbl>   <dbl>
-1 Model        1   0.0152      4.92   0.032
+1 Model        1   0.0152      4.92   0.029
 2 Residual    61   0.189      NA     NA    
 ANOVA (Size-Depth):
 # A tibble: 2 × 5
   term        df Variance statistic p.value
   <chr>    <dbl>    <dbl>     <dbl>   <dbl>
-1 Model        1   0.0103      3.34   0.071
-2 Residual    61   0.189      NA     NA    
-Fligner-Killeen Test:
-
-	Fligner-Killeen test of homogeneity of variances
-
-data:  d15N by trawling_depth
-Fligner-Killeen:med chi-squared = 13.106, df = 10, p-value = 0.2178
+1 Model        1   0.0103      3.34    0.06
+2 Residual    61   0.189      NA      NA   
 ```
 :::
 
 ::: {.cell-output-display}
-![](index_files/figure-html/varpart-3.png){width=672}
+![](index_files/figure-html/varpart-5.png){width=768}
+:::
+
+::: {.cell-output-display}
+![](index_files/figure-html/varpart-6.png){width=768}
+:::
+
+::: {.cell-output-display}
+![](index_files/figure-html/varpart-7.png){width=768}
 :::
 
 ::: {.cell-output .cell-output-stdout}
@@ -728,7 +821,7 @@ ANOVA (Depth-Size):
 # A tibble: 2 × 5
   term        df Variance statistic p.value
   <chr>    <dbl>    <dbl>     <dbl>   <dbl>
-1 Model        1 0.000170    0.0807   0.774
+1 Model        1 0.000170    0.0807   0.797
 2 Residual   139 0.292      NA       NA    
 ANOVA (Size-Depth):
 # A tibble: 2 × 5
@@ -736,17 +829,19 @@ ANOVA (Size-Depth):
   <chr>    <dbl>    <dbl>     <dbl>   <dbl>
 1 Model        1    0.115      54.5   0.001
 2 Residual   139    0.292      NA    NA    
-Fligner-Killeen Test:
-
-	Fligner-Killeen test of homogeneity of variances
-
-data:  d15N by trawling_depth
-Fligner-Killeen:med chi-squared = 7.5064, df = 11, p-value = 0.7567
 ```
 :::
 
 ::: {.cell-output-display}
-![](index_files/figure-html/varpart-4.png){width=672}
+![](index_files/figure-html/varpart-8.png){width=768}
+:::
+
+::: {.cell-output-display}
+![](index_files/figure-html/varpart-9.png){width=768}
+:::
+
+::: {.cell-output-display}
+![](index_files/figure-html/varpart-10.png){width=768}
 :::
 
 ::: {.cell-output .cell-output-stdout}
@@ -755,25 +850,27 @@ ANOVA (Depth-Size):
 # A tibble: 2 × 5
   term        df Variance statistic p.value
   <chr>    <dbl>    <dbl>     <dbl>   <dbl>
-1 Model        1  0.00254     0.578   0.486
+1 Model        1  0.00254     0.578   0.478
 2 Residual    20  0.0879     NA      NA    
 ANOVA (Size-Depth):
 # A tibble: 2 × 5
   term        df Variance statistic p.value
   <chr>    <dbl>    <dbl>     <dbl>   <dbl>
-1 Model        1  0.00572      1.30   0.267
+1 Model        1  0.00572      1.30   0.273
 2 Residual    20  0.0879      NA     NA    
-Fligner-Killeen Test:
-
-	Fligner-Killeen test of homogeneity of variances
-
-data:  d15N by trawling_depth
-Fligner-Killeen:med chi-squared = 0.6575, df = 1, p-value = 0.4174
 ```
 :::
 
 ::: {.cell-output-display}
-![](index_files/figure-html/varpart-5.png){width=672}
+![](index_files/figure-html/varpart-11.png){width=768}
+:::
+
+::: {.cell-output-display}
+![](index_files/figure-html/varpart-12.png){width=768}
+:::
+
+::: {.cell-output-display}
+![](index_files/figure-html/varpart-13.png){width=768}
 :::
 
 ::: {.cell-output .cell-output-stdout}
@@ -782,25 +879,27 @@ ANOVA (Depth-Size):
 # A tibble: 2 × 5
   term        df    Variance  statistic p.value
   <chr>    <dbl>       <dbl>      <dbl>   <dbl>
-1 Model        1 0.000000616  0.0000724   0.995
+1 Model        1 0.000000616  0.0000724   0.997
 2 Residual    23 0.196       NA          NA    
 ANOVA (Size-Depth):
 # A tibble: 2 × 5
   term        df Variance statistic p.value
   <chr>    <dbl>    <dbl>     <dbl>   <dbl>
-1 Model        1   0.0324      3.81   0.071
+1 Model        1   0.0324      3.81   0.053
 2 Residual    23   0.196      NA     NA    
-Fligner-Killeen Test:
-
-	Fligner-Killeen test of homogeneity of variances
-
-data:  d15N by trawling_depth
-Fligner-Killeen:med chi-squared = 4.5142, df = 3, p-value = 0.211
 ```
 :::
 
 ::: {.cell-output-display}
-![](index_files/figure-html/varpart-6.png){width=672}
+![](index_files/figure-html/varpart-14.png){width=768}
+:::
+
+::: {.cell-output-display}
+![](index_files/figure-html/varpart-15.png){width=768}
+:::
+
+::: {.cell-output-display}
+![](index_files/figure-html/varpart-16.png){width=768}
 :::
 
 ::: {.cell-output .cell-output-stdout}
@@ -809,7 +908,7 @@ ANOVA (Depth-Size):
 # A tibble: 2 × 5
   term        df Variance statistic p.value
   <chr>    <dbl>    <dbl>     <dbl>   <dbl>
-1 Model        1  0.00449      1.75   0.176
+1 Model        1  0.00449      1.75   0.203
 2 Residual    77  0.198       NA     NA    
 ANOVA (Size-Depth):
 # A tibble: 2 × 5
@@ -817,17 +916,19 @@ ANOVA (Size-Depth):
   <chr>    <dbl>    <dbl>     <dbl>   <dbl>
 1 Model        1   0.0673      26.2   0.001
 2 Residual    77   0.198       NA    NA    
-Fligner-Killeen Test:
-
-	Fligner-Killeen test of homogeneity of variances
-
-data:  d15N by trawling_depth
-Fligner-Killeen:med chi-squared = 7.1952, df = 8, p-value = 0.5157
 ```
 :::
 
 ::: {.cell-output-display}
-![](index_files/figure-html/varpart-7.png){width=672}
+![](index_files/figure-html/varpart-17.png){width=768}
+:::
+
+::: {.cell-output-display}
+![](index_files/figure-html/varpart-18.png){width=768}
+:::
+
+::: {.cell-output-display}
+![](index_files/figure-html/varpart-19.png){width=768}
 :::
 
 ::: {.cell-output .cell-output-stdout}
@@ -836,25 +937,27 @@ ANOVA (Depth-Size):
 # A tibble: 2 × 5
   term        df Variance statistic p.value
   <chr>    <dbl>    <dbl>     <dbl>   <dbl>
-1 Model        1 0.000379     0.480   0.477
-2 Residual    72 0.0568      NA      NA    
+1 Model        1 0.000379     0.480    0.49
+2 Residual    72 0.0568      NA       NA   
 ANOVA (Size-Depth):
 # A tibble: 2 × 5
   term        df Variance statistic p.value
   <chr>    <dbl>    <dbl>     <dbl>   <dbl>
-1 Model        1 0.000252     0.320   0.611
+1 Model        1 0.000252     0.320   0.596
 2 Residual    72 0.0568      NA      NA    
-Fligner-Killeen Test:
-
-	Fligner-Killeen test of homogeneity of variances
-
-data:  d15N by trawling_depth
-Fligner-Killeen:med chi-squared = 8.8286, df = 9, p-value = 0.4532
 ```
 :::
 
 ::: {.cell-output-display}
-![](index_files/figure-html/varpart-8.png){width=672}
+![](index_files/figure-html/varpart-20.png){width=768}
+:::
+
+::: {.cell-output-display}
+![](index_files/figure-html/varpart-21.png){width=768}
+:::
+
+::: {.cell-output-display}
+![](index_files/figure-html/varpart-22.png){width=768}
 :::
 
 ::: {.cell-output .cell-output-stdout}
@@ -863,25 +966,27 @@ ANOVA (Depth-Size):
 # A tibble: 2 × 5
   term        df Variance statistic p.value
   <chr>    <dbl>    <dbl>     <dbl>   <dbl>
-1 Model        1  0.00619     0.350   0.583
+1 Model        1  0.00619     0.350   0.547
 2 Residual    17  0.300      NA      NA    
 ANOVA (Size-Depth):
 # A tibble: 2 × 5
   term        df Variance statistic p.value
   <chr>    <dbl>    <dbl>     <dbl>   <dbl>
-1 Model        1   0.0155     0.880   0.352
+1 Model        1   0.0155     0.880   0.371
 2 Residual    17   0.300     NA      NA    
-Fligner-Killeen Test:
-
-	Fligner-Killeen test of homogeneity of variances
-
-data:  d15N by trawling_depth
-Fligner-Killeen:med chi-squared = 3.2552, df = 2, p-value = 0.1964
 ```
 :::
 
 ::: {.cell-output-display}
-![](index_files/figure-html/varpart-9.png){width=672}
+![](index_files/figure-html/varpart-23.png){width=768}
+:::
+
+::: {.cell-output-display}
+![](index_files/figure-html/varpart-24.png){width=768}
+:::
+
+::: {.cell-output-display}
+![](index_files/figure-html/varpart-25.png){width=768}
 :::
 
 ::: {.cell-output .cell-output-stdout}
@@ -896,19 +1001,21 @@ ANOVA (Size-Depth):
 # A tibble: 2 × 5
   term        df Variance statistic p.value
   <chr>    <dbl>    <dbl>     <dbl>   <dbl>
-1 Model        1   0.0450      5.28    0.03
-2 Residual    28   0.239      NA      NA   
-Fligner-Killeen Test:
-
-	Fligner-Killeen test of homogeneity of variances
-
-data:  d15N by trawling_depth
-Fligner-Killeen:med chi-squared = 0.68733, df = 4, p-value = 0.9529
+1 Model        1   0.0450      5.28   0.026
+2 Residual    28   0.239      NA     NA    
 ```
 :::
 
 ::: {.cell-output-display}
-![](index_files/figure-html/varpart-10.png){width=672}
+![](index_files/figure-html/varpart-26.png){width=768}
+:::
+
+::: {.cell-output-display}
+![](index_files/figure-html/varpart-27.png){width=768}
+:::
+
+::: {.cell-output-display}
+![](index_files/figure-html/varpart-28.png){width=768}
 :::
 
 ::: {.cell-output .cell-output-stdout}
@@ -917,21 +1024,23 @@ ANOVA (Depth-Size):
 # A tibble: 2 × 5
   term        df Variance statistic p.value
   <chr>    <dbl>    <dbl>     <dbl>   <dbl>
-1 Model        1   0.0263      7.48    0.01
-2 Residual   111   0.391      NA      NA   
+1 Model        1   0.0263      7.48   0.005
+2 Residual   111   0.391      NA     NA    
 ANOVA (Size-Depth):
 # A tibble: 2 × 5
   term        df Variance statistic p.value
   <chr>    <dbl>    <dbl>     <dbl>   <dbl>
-1 Model        1 0.000203    0.0576   0.803
+1 Model        1 0.000203    0.0576   0.811
 2 Residual   111 0.391      NA       NA    
-Fligner-Killeen Test:
-
-	Fligner-Killeen test of homogeneity of variances
-
-data:  d15N by trawling_depth
-Fligner-Killeen:med chi-squared = 9.0302, df = 9, p-value = 0.4345
 ```
+:::
+
+::: {.cell-output-display}
+![](index_files/figure-html/varpart-29.png){width=768}
+:::
+
+::: {.cell-output-display}
+![](index_files/figure-html/varpart-30.png){width=768}
 :::
 :::
 
@@ -993,11 +1102,9 @@ ggplot(var_freq , aes(fill=variable, y=freq, x=species)) +
 
 ```{.r .cell-code}
 # store the plot in the "figures" file in high resolution 
-#ggsave("d15n_variability.png", path = "figures", dpi = 700, width = 8, height = 5)
+ggsave("d15n_variability.png", path = "figures", dpi = 700, width = 8, height = 5)
 ```
 :::
-
-
 
 # 4. Appendices
 
@@ -1061,7 +1168,7 @@ ggplot(subset(size_comparaison, data_set == "trawling dataset"), aes(x = size)) 
 ```
 
 ::: {.cell-output-display}
-![](index_files/figure-html/data_set-1.png){width=1440}
+![](index_files/figure-html/data_set-1.png){width=960}
 :::
 
 ```{.r .cell-code}
@@ -1101,12 +1208,12 @@ ggplot(isotopic_dataset , aes(x=size, y=d15N))+
 ```
 
 ::: {.cell-output-display}
-![](index_files/figure-html/temporal_variability-1.png){width=1440}
+![](index_files/figure-html/temporal_variability-1.png){width=960}
 :::
 
 ```{.r .cell-code}
 #store the plot in the "figures" file in high resolution 
-ggsave("Appendix_2.tiff", path = "figures", dpi = 600, height = 8, width = 9)
+ggsave("Appendix_2.png", path = "figures", dpi = 600, height = 8, width = 9)
 ```
 :::
 
@@ -1184,6 +1291,6 @@ ggplot(trawling_dataset_ns, aes(x=size)) +
 
 ```{.r .cell-code}
 # store the plot in the "figures" file in high resolution 
-ggsave("Appendix_3.tiff", path = "figures", dpi = 600, width = 9, height = 8)
+ggsave("Appendix_3.png", path = "figures", dpi = 600, width = 9, height = 8)
 ```
 :::
