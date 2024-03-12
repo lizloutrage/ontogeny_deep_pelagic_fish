@@ -8,16 +8,18 @@ GPL-2](https://img.shields.io/badge/License-GPL%20v2-blue.svg)](https://chooseal
 <!-- badges: end -->
 
 The goal of the R project `ontogeny_deep_pelagic_fish` is to reproduce
-the analyses carried out in the paper by Loutrage et al., *“Ontogenetic
-shift or not? Different foraging trade-offs within the meso- to
-bathypelagic fish community”*
+the analyses carried out in the paper by Loutrage et al.2024 (DOI :
+10.1002/ece3.11129), *“Ontogenetic shift or not? Different foraging
+trade-offs within the meso- to bathypelagic fish community”*
 
 ## Data:
 
-All raw data are available in the online directory XX :
+All raw data are available in the online directory data.InDoRES
+platform:
 
 - DOI of the size-depth distribution data:
-- DOI of the isotopic data:
+  <https://doi.org/10.48579/PRO/O5QHTE>
+- DOI of the isotopic data: <https://doi.org/10.48579/PRO/QE2VWQ>
 
 ## Overview
 

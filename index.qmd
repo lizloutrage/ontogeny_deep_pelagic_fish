@@ -421,8 +421,9 @@ ggpubr::ggarrange(
 )
 
 # store the plot in the "figures" file in high resolution 
-ggsave("d15n_size_sp.png", path = "figures", dpi = 700, height = 13, width = 10)
+ggsave("d15n_size_sp.png", path = "figures", dpi = 700, height = 15, width = 10)
 ```
+
 #### Assumptions validation
 ```{r}
 #| echo: true
@@ -607,7 +608,7 @@ var_freq$variable <- factor(var_freq$variable,
 # plot
 ggplot(var_freq , aes(fill=variable, y=freq, x=species)) + 
   geom_bar(position="stack", stat="identity", alpha=0.6, linewidth=0.5)+
-  scale_fill_manual(values = c("#33505C","#861D31","#D8973C"))+
+  scale_fill_manual(values = c("#33505C","#861D31","#D8973C", "grey"))+
   theme_light()+
   coord_flip()+
   ylim(c(0,40))+
@@ -624,6 +625,7 @@ ggplot(var_freq , aes(fill=variable, y=freq, x=species)) +
 # store the plot in the "figures" file in high resolution 
 ggsave("d15n_variability.png", path = "figures", dpi = 700, width = 8, height = 5)
 ```
+
 # 4. Appendices
 
 ## Representativeness of sample sizes between the two data sets 
@@ -687,7 +689,7 @@ ggplot(subset(size_comparaison, data_set == "trawling dataset"), aes(x = size)) 
   geom_segment(data = size_ranges,
                aes(x = min_size, xend = max_size, y = 0, yend = 0), color = "#3596B5", linewidth=1.2)
 
-ggsave("Appendix_1.png", path = "figures", dpi = 200, width = 9, height = 8)
+ggsave("Appendix_1.png", path = "figures", dpi = 700, width = 9, height = 8)
 ```
 
 ## Test of temporal variability on $\delta$<sup>15</sup>N values
@@ -724,7 +726,7 @@ ggplot(isotopic_dataset , aes(x=size, y=d15N))+
 
 
 #store the plot in the "figures" file in high resolution 
-ggsave("Appendix_2.png", path = "figures", dpi = 600, height = 8, width = 9)
+ggsave("Appendix_2.png", path = "figures", dpi = 700, height = 8, width = 9)
 ```
 
 ## Non-significant size-depth relationships at species level
@@ -797,7 +799,7 @@ ggplot(trawling_dataset_ns, aes(x=size)) +
              linewidth=0.6, linetype="dashed")
 
 # store the plot in the "figures" file in high resolution 
-ggsave("Appendix_3.png", path = "figures", dpi = 600, width = 9, height = 8)
+ggsave("Appendix_3.png", path = "figures", dpi = 700, width = 9, height = 8)
 
 ```
 
