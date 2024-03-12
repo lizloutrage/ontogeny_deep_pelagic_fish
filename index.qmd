@@ -608,7 +608,7 @@ var_freq$variable <- factor(var_freq$variable,
 # plot
 ggplot(var_freq , aes(fill=variable, y=freq, x=species)) + 
   geom_bar(position="stack", stat="identity", alpha=0.6, linewidth=0.5)+
-  scale_fill_manual(values = c("#33505C","#861D31","#D8973C", "grey"))+
+  scale_fill_manual(values = c( "grey","#33505C","#861D31","#D8973C"))+
   theme_light()+
   coord_flip()+
   ylim(c(0,40))+
