@@ -1,19 +1,14 @@
 ---
 title: "README"
 author: "Liz Loutrage"
-date: "2023-08-31"
 output: html_document
 ---
 
 
-Two different datasets were used to study ontogenetic changes in deep-sea pelagic fish species from the Bay of Biscay :
-
-- __The trawling (first) dataset__: included all data collected by trawls (i.e. number of individuals per species per sampling depth and total body length of each individual; n = 4165). __DOI :__ 
-
-- To study the trophic aspects of ontogeny, muscle sampling was performed on 12 species of the trawling dataset to access the$\delta$<sup>15</sup>N values of individuals (n = 682). This constituted the __isotopic (second) dataset__. The size measured for the individuals sampled for the isotopic dataset was the standard length. __DOI :__
+Two different datasets were used to study ontogenetic changes in deep-pelagic fish species from the Bay of Biscay :
 
 ## Trawling data: 
-  - [`data/trawling_dataset.csv`]: contains data on the size (total length in cm) of the sampled individuals and the sampling depth (m)
+  - [`data/trawling_dataset.csv`]: included all data collected by trawls (i.e. number of individuals per species per sampling depth and total body length of each individual; n = 4165). __DOI :https://doi.org/10.48579/PRO/O5QHTE __ 
 
 ## Isotopie data:
-  - [`data/ontogeny_isotopy_data.csv`]: contains data on the $\delta$<sup>15</sup>N values (‰) of each individual sampled, as well as their size (standard length in cm) and the trawling depth (m). 
+  - [`data/ontogeny_isotopy_data.csv`]: To study the trophic aspects of ontogeny, muscle sampling was performed on 12 species of the trawling dataset to access the$\delta$<sup>15</sup>N values of individuals (n = 682). This constituted the __isotopic (second) dataset__. The size measured for the individuals sampled for the isotopic dataset was the standard length. __DOI : https://doi.org/10.48579/PRO/QE2VWQ  __

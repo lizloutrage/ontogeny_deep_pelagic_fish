@@ -30,6 +30,8 @@ library(dplyr)
 library(ggplot2)
 
 # Isotopic data set ----
+# DOI and reference : https://doi.org/10.48579/PRO/QE2VWQ 
+
 isotopic_dataset <-
   readxl::read_excel(here::here(
     "data",
@@ -44,6 +46,8 @@ isotopic_dataset <-
   mutate(d15N= coalesce(`δ15N (untreated)`,`δ15N (cyclohexane-delipidated)`))
 
 # Trawling data set ----
+# DOI and reference : https://doi.org/10.48579/PRO/O5QHTE
+
 trawling_dataset <-
   readxl::read_excel(here::here(
     "data",
@@ -54,7 +58,7 @@ trawling_dataset <-
   rename(trawling_depth = `Trawling depth [m]`,
          size = `Total length [cm]`,
          species = Species)%>%
-  # add column with depth layer (cf Loutrage et al., 2023)
+  # add column with depth layer (cf Loutrage et al., 2023, DOI : 10.1016/j.pocean.2023.103070)
   mutate(
     depth_layer = case_when(
       between(trawling_depth, 0, 174) ~ "Epipelagic",
@@ -146,8 +150,8 @@ htmltools::tagList(DT::datatable(lr_size_depth_community))
 ::: {.cell-output-display}
 
 ```{=html}
-<div class="datatables html-widget html-fill-item" id="htmlwidget-ce9674cd863f85365391" style="width:100%;height:auto;"></div>
-<script type="application/json" data-for="htmlwidget-ce9674cd863f85365391">{"x":{"filter":"none","vertical":false,"data":[["1","2"],["(Intercept)","trawling_depth"],[8.91,0],[0.4,0],[22.4,7.34],[0,0]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>term<\/th>\n      <th>estimate<\/th>\n      <th>std.error<\/th>\n      <th>statistic<\/th>\n      <th>p.value<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"className":"dt-right","targets":[2,3,4,5]},{"orderable":false,"targets":0},{"name":" ","targets":0},{"name":"term","targets":1},{"name":"estimate","targets":2},{"name":"std.error","targets":3},{"name":"statistic","targets":4},{"name":"p.value","targets":5}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
+<div class="datatables html-widget html-fill-item" id="htmlwidget-6547ad304ffca17a7eca" style="width:100%;height:auto;"></div>
+<script type="application/json" data-for="htmlwidget-6547ad304ffca17a7eca">{"x":{"filter":"none","vertical":false,"data":[["1","2"],["(Intercept)","trawling_depth"],[8.91,0],[0.4,0],[22.4,7.34],[0,0]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>term<\/th>\n      <th>estimate<\/th>\n      <th>std.error<\/th>\n      <th>statistic<\/th>\n      <th>p.value<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"className":"dt-right","targets":[2,3,4,5]},{"orderable":false,"targets":0},{"name":" ","targets":0},{"name":"term","targets":1},{"name":"estimate","targets":2},{"name":"std.error","targets":3},{"name":"statistic","targets":4},{"name":"p.value","targets":5}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
 ```
 
 :::
@@ -157,7 +161,6 @@ htmltools::tagList(DT::datatable(lr_size_depth_community))
 ## Species level
 ### Linear relationships
 
-#### Regressions
 
 ::: {.cell}
 
@@ -173,8 +176,8 @@ htmltools::tagList(DT::datatable(lr_size_depth_sp))
 ::: {.cell-output-display}
 
 ```{=html}
-<div class="datatables html-widget html-fill-item" id="htmlwidget-6c19d645ab7bed773877" style="width:100%;height:auto;"></div>
-<script type="application/json" data-for="htmlwidget-6c19d645ab7bed773877">{"x":{"filter":"none","vertical":false,"data":[["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24"],["Aphanopus carbo","Aphanopus carbo","Arctozenus risso","Arctozenus risso","Argyropelecus olfersii","Argyropelecus olfersii","Lampanyctus crocodilus","Lampanyctus crocodilus","Lampanyctus macdonaldi","Lampanyctus macdonaldi","Melanostigma atlanticum","Melanostigma atlanticum","Myctophum punctatum","Myctophum punctatum","Notoscopelus kroyeri","Notoscopelus kroyeri","Searsia koefoedi","Searsia koefoedi","Serrivomer beanii","Serrivomer beanii","Stomias boa","Stomias boa","Xenodermichthys copei","Xenodermichthys copei"],["(Intercept)","trawling_depth","(Intercept)","trawling_depth","(Intercept)","trawling_depth","(Intercept)","trawling_depth","(Intercept)","trawling_depth","(Intercept)","trawling_depth","(Intercept)","trawling_depth","(Intercept)","trawling_depth","(Intercept)","trawling_depth","(Intercept)","trawling_depth","(Intercept)","trawling_depth","(Intercept)","trawling_depth"],[75.64,0.01,17.54,-0,6.7,0,9.6,0,14.12,0,3.55,0,7.06,-0,7.52,-0,12.22,0,53.92,0,25.09,0,9.09,0],[8.32,0.01,0.5,0,0.29,0,0.19,0,0.5600000000000001,0,0.87,0,0.14,0,0.2,0,1.25,0,3.52,0,1.99,0,0.32,0],[9.09,1.53,34.75,-1.21,22.99,0.38,50.14,7.92,25.12,0.52,4.09,5.21,50.63,-2.06,38.29,-0.11,9.800000000000001,0.17,15.33,0.17,12.58,0.08,28.86,3.36],[0,0.14,0,0.23,0,0.71,0,0,0,0.61,0,0,0,0.04,0,0.91,0,0.86,0,0.87,0,0.9399999999999999,0,0]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>species<\/th>\n      <th>term<\/th>\n      <th>estimate<\/th>\n      <th>std.error<\/th>\n      <th>statistic<\/th>\n      <th>p.value<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"className":"dt-right","targets":[3,4,5,6]},{"orderable":false,"targets":0},{"name":" ","targets":0},{"name":"species","targets":1},{"name":"term","targets":2},{"name":"estimate","targets":3},{"name":"std.error","targets":4},{"name":"statistic","targets":5},{"name":"p.value","targets":6}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
+<div class="datatables html-widget html-fill-item" id="htmlwidget-42abd7b1985d33ab1cfc" style="width:100%;height:auto;"></div>
+<script type="application/json" data-for="htmlwidget-42abd7b1985d33ab1cfc">{"x":{"filter":"none","vertical":false,"data":[["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24"],["Aphanopus carbo","Aphanopus carbo","Arctozenus risso","Arctozenus risso","Argyropelecus olfersii","Argyropelecus olfersii","Lampanyctus crocodilus","Lampanyctus crocodilus","Lampanyctus macdonaldi","Lampanyctus macdonaldi","Melanostigma atlanticum","Melanostigma atlanticum","Myctophum punctatum","Myctophum punctatum","Notoscopelus kroyeri","Notoscopelus kroyeri","Searsia koefoedi","Searsia koefoedi","Serrivomer beanii","Serrivomer beanii","Stomias boa","Stomias boa","Xenodermichthys copei","Xenodermichthys copei"],["(Intercept)","trawling_depth","(Intercept)","trawling_depth","(Intercept)","trawling_depth","(Intercept)","trawling_depth","(Intercept)","trawling_depth","(Intercept)","trawling_depth","(Intercept)","trawling_depth","(Intercept)","trawling_depth","(Intercept)","trawling_depth","(Intercept)","trawling_depth","(Intercept)","trawling_depth","(Intercept)","trawling_depth"],[75.64,0.01,17.54,-0,6.7,0,9.6,0,14.12,0,3.55,0,7.06,-0,7.52,-0,12.22,0,53.92,0,25.09,0,9.09,0],[8.32,0.01,0.5,0,0.29,0,0.19,0,0.5600000000000001,0,0.87,0,0.14,0,0.2,0,1.25,0,3.52,0,1.99,0,0.32,0],[9.09,1.53,34.75,-1.21,22.99,0.38,50.14,7.92,25.12,0.52,4.09,5.21,50.63,-2.06,38.29,-0.11,9.800000000000001,0.17,15.33,0.17,12.58,0.08,28.86,3.36],[0,0.14,0,0.23,0,0.71,0,0,0,0.61,0,0,0,0.04,0,0.91,0,0.86,0,0.87,0,0.9399999999999999,0,0]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>species<\/th>\n      <th>term<\/th>\n      <th>estimate<\/th>\n      <th>std.error<\/th>\n      <th>statistic<\/th>\n      <th>p.value<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"className":"dt-right","targets":[3,4,5,6]},{"orderable":false,"targets":0},{"name":" ","targets":0},{"name":"species","targets":1},{"name":"term","targets":2},{"name":"estimate","targets":3},{"name":"std.error","targets":4},{"name":"statistic","targets":5},{"name":"p.value","targets":6}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
 ```
 
 :::
@@ -186,7 +189,8 @@ htmltools::tagList(DT::datatable(lr_size_depth_sp))
 ::: {.cell}
 
 ```{.r .cell-code}
-# selection of species with a significant size-depth relationship (from linear relationships)
+# selection of species with a significant size-depth relationship (from linear models)
+
 trawling_dataset_significant <- filter(trawling_dataset,
                                     species %in% c("Lampanyctus crocodilus","Melanostigma atlanticum",
                                                    "Xenodermichthys copei","Myctophum punctatum"))
@@ -236,7 +240,8 @@ ggsave("density_plot_species.png", path = "figures", dpi = 700, height = 7, widt
 
 # 2. $\delta$<sup>15</sup>N-size relationships
 
-__Latitude-depth influence on $\delta$<sup>15</sup>N values__
+__Latitude-depth influence on $\delta$<sup>15</sup>N values__ : as the sampling was carried out over a wide range of latitudes, we check that this has not had a significant influence on the $\delta$<sup>15</sup>N values using an analysis of variance (is it depth or latitude that has the greatest influence on these values?) 
+
 - No significant influence of latitude on $\delta$<sup>15</sup>N values
 
 ::: {.cell}
@@ -287,7 +292,7 @@ Number of permutations: 999
 
 Model: rda(X = isotopic_varpart$d15N, Y = isotopic_varpart$trawling_depth, Z = isotopic_varpart$LatitudeEvent)
           Df Variance      F Pr(>F)  
-Model      1  0.01003 2.7091  0.099 .
+Model      1  0.01003 2.7091  0.094 .
 Residual 172  0.63668                
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
@@ -306,7 +311,7 @@ Number of permutations: 999
 
 Model: rda(X = isotopic_varpart$d15N, Y = isotopic_varpart$LatitudeEvent, Z = isotopic_varpart$trawling_depth)
           Df Variance      F Pr(>F)
-Model      1  0.00097 0.2614  0.601
+Model      1  0.00097 0.2614  0.621
 Residual 172  0.63668              
 ```
 :::
@@ -376,8 +381,8 @@ htmltools::tagList(DT::datatable(data_sum))
 ::: {.cell-output-display}
 
 ```{=html}
-<div class="datatables html-widget html-fill-item" id="htmlwidget-d915f94f359bdf54e162" style="width:100%;height:auto;"></div>
-<script type="application/json" data-for="htmlwidget-d915f94f359bdf54e162">{"x":{"filter":"none","vertical":false,"data":[["1","2","3","4","5","6","7","8","9","10","11","12"],["Aphanopus carbo","Arctozenus risso","Argyropelecus olfersii","Lampanyctus crocodilus","Lampanyctus macdonaldi","Melanostigma atlanticum","Myctophum punctatum","Notoscopelus kroyeri","Searsia koefoedi","Serrivomer beanii","Stomias boa","Xenodermichthys copei"],[37,9.5,6.7,8.300000000000001,3.3,4,4,8.1,6,45,21.8,13.9],[59,11,3.3,6.5,11.5,7,5,3.6,8.5,26.7,11.8,5.6],[96,20.5,10,14.8,14.8,11,9,11.7,14.5,71.7,33.6,19.5],[77.33,16.48,6.3,10.95,13.13,9.65,6.73,7.86,11.69,55.36,23.8,11.78],[12.36,10.53,10.18,10.46,11.54,11.21,9.99,11.18,11.8,9.49,11.61,9.83],[30,409,963,1229,666,278,1309,755,247,618,100,963]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>species<\/th>\n      <th>range_size<\/th>\n      <th>min_size<\/th>\n      <th>max_size<\/th>\n      <th>mean_size<\/th>\n      <th>mean_d15n<\/th>\n      <th>range_depth<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"className":"dt-right","targets":[2,3,4,5,6,7]},{"orderable":false,"targets":0},{"name":" ","targets":0},{"name":"species","targets":1},{"name":"range_size","targets":2},{"name":"min_size","targets":3},{"name":"max_size","targets":4},{"name":"mean_size","targets":5},{"name":"mean_d15n","targets":6},{"name":"range_depth","targets":7}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
+<div class="datatables html-widget html-fill-item" id="htmlwidget-6cab8504c0e84e92d197" style="width:100%;height:auto;"></div>
+<script type="application/json" data-for="htmlwidget-6cab8504c0e84e92d197">{"x":{"filter":"none","vertical":false,"data":[["1","2","3","4","5","6","7","8","9","10","11","12"],["Aphanopus carbo","Arctozenus risso","Argyropelecus olfersii","Lampanyctus crocodilus","Lampanyctus macdonaldi","Melanostigma atlanticum","Myctophum punctatum","Notoscopelus kroyeri","Searsia koefoedi","Serrivomer beanii","Stomias boa","Xenodermichthys copei"],[37,9.5,6.7,8.300000000000001,3.3,4,4,8.1,6,45,21.8,13.9],[59,11,3.3,6.5,11.5,7,5,3.6,8.5,26.7,11.8,5.6],[96,20.5,10,14.8,14.8,11,9,11.7,14.5,71.7,33.6,19.5],[77.33,16.48,6.3,10.95,13.13,9.65,6.73,7.86,11.69,55.36,23.8,11.78],[12.36,10.53,10.18,10.46,11.54,11.21,9.99,11.18,11.8,9.49,11.61,9.83],[30,409,963,1229,666,278,1309,755,247,618,100,963]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>species<\/th>\n      <th>range_size<\/th>\n      <th>min_size<\/th>\n      <th>max_size<\/th>\n      <th>mean_size<\/th>\n      <th>mean_d15n<\/th>\n      <th>range_depth<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"className":"dt-right","targets":[2,3,4,5,6,7]},{"orderable":false,"targets":0},{"name":" ","targets":0},{"name":"species","targets":1},{"name":"range_size","targets":2},{"name":"min_size","targets":3},{"name":"max_size","targets":4},{"name":"mean_size","targets":5},{"name":"mean_d15n","targets":6},{"name":"range_depth","targets":7}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
 ```
 
 :::
@@ -500,7 +505,7 @@ plot_non_significant <- ggplot(ontogeny_non_significant, aes(x=size, y=d15N))+
   geom_text(coeff_var, mapping = aes(x = -Inf, y = -Inf, label = paste("CV = ", d15N, sep = "")),
             hjust = -0.2, vjust = -0.8, size = 4)
 
-# Combine the two plot 
+# Combine the two plots 
 ggpubr::ggarrange(
   plot_significant,
   plot_non_significant,
@@ -521,7 +526,7 @@ ggsave("d15n_size_sp.png", path = "figures", dpi = 700, height = 15, width = 10)
 :::
 
 
-#### Assumptions validation
+#### Assumptions validation for linear models
 
 ::: {.cell}
 
@@ -649,7 +654,6 @@ $`Melanostigma atlanticum`
 :::
 
 
-
 # 3. Variation partitionning
 
 -   At the species level, is it the sampling depth or the size of the individuals that most influences the values in $\delta$<sup>15</sup>N?
@@ -663,10 +667,6 @@ $`Melanostigma atlanticum`
 # S. boa and A. carbo not considered in this analysis due to small depth range sampled
 varpart_data <- isotopic_dataset %>%
   filter(!species %in% c("Stomias boa", "Aphanopus carbo")) %>%
-  # outliers to remove 
-  # filter(!c(species == "Melanostigma atlanticum" & d15N == 9.85)) %>%
-  # filter(!c(species == "Stomias boa" & d15N == 9.47)) %>%
-  # filter(!c(species == "Argyropelecus olfersii" & d15N == 8.15))
   arrange(species)
 
 # List of species names
@@ -766,13 +766,13 @@ ANOVA (Depth-Size):
 # A tibble: 2 × 5
   term        df Variance statistic p.value
   <chr>    <dbl>    <dbl>     <dbl>   <dbl>
-1 Model        1  0.00218      1.43   0.217
+1 Model        1  0.00218      1.43   0.246
 2 Residual    75  0.114       NA     NA    
 ANOVA (Size-Depth):
 # A tibble: 2 × 5
   term        df Variance statistic p.value
   <chr>    <dbl>    <dbl>     <dbl>   <dbl>
-1 Model        1  0.00878      5.78   0.019
+1 Model        1  0.00878      5.78   0.018
 2 Residual    75  0.114       NA     NA    
 ```
 :::
@@ -795,7 +795,7 @@ ANOVA (Depth-Size):
 # A tibble: 2 × 5
   term        df Variance statistic p.value
   <chr>    <dbl>    <dbl>     <dbl>   <dbl>
-1 Model        1   0.0152      4.92   0.036
+1 Model        1   0.0152      4.92   0.029
 2 Residual    61   0.189      NA     NA    
 ANOVA (Size-Depth):
 # A tibble: 2 × 5
@@ -824,8 +824,8 @@ ANOVA (Depth-Size):
 # A tibble: 2 × 5
   term        df Variance statistic p.value
   <chr>    <dbl>    <dbl>     <dbl>   <dbl>
-1 Model        1 0.000170    0.0807   0.763
-2 Residual   139 0.292      NA       NA    
+1 Model        1 0.000170    0.0807    0.78
+2 Residual   139 0.292      NA        NA   
 ANOVA (Size-Depth):
 # A tibble: 2 × 5
   term        df Variance statistic p.value
@@ -853,13 +853,13 @@ ANOVA (Depth-Size):
 # A tibble: 2 × 5
   term        df Variance statistic p.value
   <chr>    <dbl>    <dbl>     <dbl>   <dbl>
-1 Model        1  0.00254     0.578   0.469
+1 Model        1  0.00254     0.578   0.491
 2 Residual    20  0.0879     NA      NA    
 ANOVA (Size-Depth):
 # A tibble: 2 × 5
   term        df Variance statistic p.value
   <chr>    <dbl>    <dbl>     <dbl>   <dbl>
-1 Model        1  0.00572      1.30   0.269
+1 Model        1  0.00572      1.30   0.255
 2 Residual    20  0.0879      NA     NA    
 ```
 :::
@@ -882,13 +882,13 @@ ANOVA (Depth-Size):
 # A tibble: 2 × 5
   term        df    Variance  statistic p.value
   <chr>    <dbl>       <dbl>      <dbl>   <dbl>
-1 Model        1 0.000000616  0.0000724   0.995
+1 Model        1 0.000000616  0.0000724   0.997
 2 Residual    23 0.196       NA          NA    
 ANOVA (Size-Depth):
 # A tibble: 2 × 5
   term        df Variance statistic p.value
   <chr>    <dbl>    <dbl>     <dbl>   <dbl>
-1 Model        1   0.0324      3.81   0.065
+1 Model        1   0.0324      3.81   0.062
 2 Residual    23   0.196      NA     NA    
 ```
 :::
@@ -911,7 +911,7 @@ ANOVA (Depth-Size):
 # A tibble: 2 × 5
   term        df Variance statistic p.value
   <chr>    <dbl>    <dbl>     <dbl>   <dbl>
-1 Model        1  0.00449      1.75   0.186
+1 Model        1  0.00449      1.75   0.209
 2 Residual    77  0.198       NA     NA    
 ANOVA (Size-Depth):
 # A tibble: 2 × 5
@@ -940,13 +940,13 @@ ANOVA (Depth-Size):
 # A tibble: 2 × 5
   term        df Variance statistic p.value
   <chr>    <dbl>    <dbl>     <dbl>   <dbl>
-1 Model        1 0.000379     0.480   0.483
+1 Model        1 0.000379     0.480   0.491
 2 Residual    72 0.0568      NA      NA    
 ANOVA (Size-Depth):
 # A tibble: 2 × 5
   term        df Variance statistic p.value
   <chr>    <dbl>    <dbl>     <dbl>   <dbl>
-1 Model        1 0.000252     0.320   0.551
+1 Model        1 0.000252     0.320   0.576
 2 Residual    72 0.0568      NA      NA    
 ```
 :::
@@ -969,13 +969,13 @@ ANOVA (Depth-Size):
 # A tibble: 2 × 5
   term        df Variance statistic p.value
   <chr>    <dbl>    <dbl>     <dbl>   <dbl>
-1 Model        1  0.00619     0.350   0.565
+1 Model        1  0.00619     0.350   0.545
 2 Residual    17  0.300      NA      NA    
 ANOVA (Size-Depth):
 # A tibble: 2 × 5
   term        df Variance statistic p.value
   <chr>    <dbl>    <dbl>     <dbl>   <dbl>
-1 Model        1   0.0155     0.880   0.379
+1 Model        1   0.0155     0.880   0.383
 2 Residual    17   0.300     NA      NA    
 ```
 :::
@@ -998,13 +998,13 @@ ANOVA (Depth-Size):
 # A tibble: 2 × 5
   term        df Variance statistic p.value
   <chr>    <dbl>    <dbl>     <dbl>   <dbl>
-1 Model        1  0.00349     0.409    0.52
+1 Model        1  0.00349     0.409    0.51
 2 Residual    28  0.239      NA       NA   
 ANOVA (Size-Depth):
 # A tibble: 2 × 5
   term        df Variance statistic p.value
   <chr>    <dbl>    <dbl>     <dbl>   <dbl>
-1 Model        1   0.0450      5.28   0.023
+1 Model        1   0.0450      5.28   0.039
 2 Residual    28   0.239      NA     NA    
 ```
 :::
@@ -1027,14 +1027,14 @@ ANOVA (Depth-Size):
 # A tibble: 2 × 5
   term        df Variance statistic p.value
   <chr>    <dbl>    <dbl>     <dbl>   <dbl>
-1 Model        1   0.0263      7.48   0.007
+1 Model        1   0.0263      7.48   0.005
 2 Residual   111   0.391      NA     NA    
 ANOVA (Size-Depth):
 # A tibble: 2 × 5
   term        df Variance statistic p.value
   <chr>    <dbl>    <dbl>     <dbl>   <dbl>
-1 Model        1 0.000203    0.0576    0.83
-2 Residual   111 0.391      NA        NA   
+1 Model        1 0.000203    0.0576   0.814
+2 Residual   111 0.391      NA       NA    
 ```
 :::
 
@@ -1084,7 +1084,7 @@ var_freq$variable <- factor(var_freq$variable,
 # plot
 ggplot(var_freq , aes(fill=variable, y=freq, x=species)) + 
   geom_bar(position="stack", stat="identity", alpha=0.6, linewidth=0.5)+
-  scale_fill_manual(values = c("#33505C","#861D31","#D8973C", "grey"))+
+  scale_fill_manual(values = c( "grey","#33505C","#861D31","#D8973C"))+
   theme_light()+
   coord_flip()+
   ylim(c(0,40))+
@@ -1148,7 +1148,7 @@ trawling_dataset_comparaison <- trawling_dataset %>%
 size_comparaison <-
   rbind(trawling_dataset_comparaison, isotopic_dataset_TL)
 
-# Calculate the size range for each species in the "isotopic dataset"
+# Calculate the size range for each species in the isotopic dataset
 size_ranges <- subset(size_comparaison, data_set == "isotopic dataset") %>%
   group_by(species) %>%
   summarize(min_size = min(size), max_size = max(size))

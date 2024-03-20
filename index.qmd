@@ -30,6 +30,8 @@ library(dplyr)
 library(ggplot2)
 
 # Isotopic data set ----
+# DOI and reference : https://doi.org/10.48579/PRO/QE2VWQ 
+
 isotopic_dataset <-
   readxl::read_excel(here::here(
     "data",
@@ -44,6 +46,8 @@ isotopic_dataset <-
   mutate(d15N= coalesce(`δ15N (untreated)`,`δ15N (cyclohexane-delipidated)`))
 
 # Trawling data set ----
+# DOI and reference : https://doi.org/10.48579/PRO/O5QHTE
+
 trawling_dataset <-
   readxl::read_excel(here::here(
     "data",
@@ -54,7 +58,7 @@ trawling_dataset <-
   rename(trawling_depth = `Trawling depth [m]`,
          size = `Total length [cm]`,
          species = Species)%>%
-  # add column with depth layer (cf Loutrage et al., 2023)
+  # add column with depth layer (cf Loutrage et al., 2023, DOI : 10.1016/j.pocean.2023.103070)
   mutate(
     depth_layer = case_when(
       between(trawling_depth, 0, 174) ~ "Epipelagic",
@@ -139,7 +143,6 @@ htmltools::tagList(DT::datatable(lr_size_depth_community))
 ## Species level
 ### Linear relationships
 
-#### Regressions
 ```{r}
 #| echo: true
 #| label: size_depth_species_lm
@@ -159,7 +162,8 @@ htmltools::tagList(DT::datatable(lr_size_depth_sp))
 #| fig-width: 13
 #| label: size_depth_species
 
-# selection of species with a significant size-depth relationship (from linear relationships)
+# selection of species with a significant size-depth relationship (from linear models)
+
 trawling_dataset_significant <- filter(trawling_dataset,
                                     species %in% c("Lampanyctus crocodilus","Melanostigma atlanticum",
                                                    "Xenodermichthys copei","Myctophum punctatum"))
@@ -201,7 +205,8 @@ ggsave("density_plot_species.png", path = "figures", dpi = 700, height = 7, widt
 
 # 2. $\delta$<sup>15</sup>N-size relationships
 
-__Latitude-depth influence on $\delta$<sup>15</sup>N values__
+__Latitude-depth influence on $\delta$<sup>15</sup>N values__ : as the sampling was carried out over a wide range of latitudes, we check that this has not had a significant influence on the $\delta$<sup>15</sup>N values using an analysis of variance (is it depth or latitude that has the greatest influence on these values?) 
+
 - No significant influence of latitude on $\delta$<sup>15</sup>N values
 ```{r}
 #| echo: true
@@ -411,7 +416,7 @@ plot_non_significant <- ggplot(ontogeny_non_significant, aes(x=size, y=d15N))+
   geom_text(coeff_var, mapping = aes(x = -Inf, y = -Inf, label = paste("CV = ", d15N, sep = "")),
             hjust = -0.2, vjust = -0.8, size = 4)
 
-# Combine the two plot 
+# Combine the two plots 
 ggpubr::ggarrange(
   plot_significant,
   plot_non_significant,
@@ -424,7 +429,7 @@ ggpubr::ggarrange(
 ggsave("d15n_size_sp.png", path = "figures", dpi = 700, height = 15, width = 10)
 ```
 
-#### Assumptions validation
+#### Assumptions validation for linear models
 ```{r}
 #| echo: true
 #| label: assumptions
@@ -460,7 +465,6 @@ __Access diagnostic metrics__
 print(diag_metrics_list)
 ```
 
-
 # 3. Variation partitionning
 
 -   At the species level, is it the sampling depth or the size of the individuals that most influences the values in $\delta$<sup>15</sup>N?
@@ -476,10 +480,6 @@ print(diag_metrics_list)
 # S. boa and A. carbo not considered in this analysis due to small depth range sampled
 varpart_data <- isotopic_dataset %>%
   filter(!species %in% c("Stomias boa", "Aphanopus carbo")) %>%
-  # outliers to remove 
-  # filter(!c(species == "Melanostigma atlanticum" & d15N == 9.85)) %>%
-  # filter(!c(species == "Stomias boa" & d15N == 9.47)) %>%
-  # filter(!c(species == "Argyropelecus olfersii" & d15N == 8.15))
   arrange(species)
 
 # List of species names
@@ -667,7 +667,7 @@ trawling_dataset_comparaison <- trawling_dataset %>%
 size_comparaison <-
   rbind(trawling_dataset_comparaison, isotopic_dataset_TL)
 
-# Calculate the size range for each species in the "isotopic dataset"
+# Calculate the size range for each species in the isotopic dataset
 size_ranges <- subset(size_comparaison, data_set == "isotopic dataset") %>%
   group_by(species) %>%
   summarize(min_size = min(size), max_size = max(size))
